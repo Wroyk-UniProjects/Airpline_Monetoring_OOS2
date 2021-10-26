@@ -16,6 +16,7 @@ import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
 public class StreamingWebClient {
+	private boolean debug = false;
 	private boolean exit = false;
 	private String basicurl = null;
 	private String url;
@@ -25,13 +26,14 @@ public class StreamingWebClient {
 
 	public StreamingWebClient() {
 		String line;
+		String jsonFile = "opensky_offline.json";
 		q = new LinkedBlockingQueue<String>();
-		System.err.println("Using file: jsonsky.txt");
+		System.err.println("Using file: " + jsonFile);
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("jsonsky.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(jsonFile));
 			do {
 				line = br.readLine();
-				//System.out.println(line);
+				if(debug) System.out.println(line);
 				if(line != null)
 					q.add(line);
 			} while (line != null);
@@ -76,7 +78,7 @@ public class StreamingWebClient {
 						HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 						/* End of the fix*/
 
-						// System.out.println(url);
+						if(debug) System.out.println(url);
 						URL u = new URL(url);
 						c = (HttpsURLConnection) u.openConnection();
 						c.setRequestMethod("GET");
@@ -108,7 +110,7 @@ public class StreamingWebClient {
 					} catch (Exception ex) {
 						continue;
 					}
-					System.out.println(json);
+					if(debug) System.out.println(json);
 					q.add(json);
 					try {
 						//RF: Aenderung auf 10 Sekunden 
@@ -128,7 +130,7 @@ public class StreamingWebClient {
 			json = q.take();
 		} catch (Exception e) {
 		}
-		//System.out.println(json);
+		if(debug) System.out.println(json);
 		return json;
 	} // readJSON
 	

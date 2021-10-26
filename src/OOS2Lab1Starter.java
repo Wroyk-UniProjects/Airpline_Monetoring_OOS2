@@ -9,6 +9,7 @@ public class OOS2Lab1Starter
 
 	public static void main(String[] args)
 	{
+		//TODO urlString is read from args and a checked via regex
 		String urlString = "https://opensky-network.org/api/states/all";
 		PlaneDataServer server;
 		
@@ -19,6 +20,6 @@ public class OOS2Lab1Starter
 
 		Senser senser = new Senser(server);
 		new Thread(server).start();
-		new Thread(senser).start();
+		new Thread(senser).start();// Why two times? Why is it not running with one?
 	}
 }

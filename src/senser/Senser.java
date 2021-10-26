@@ -21,14 +21,16 @@ public class Senser implements Runnable
 	
 	public void run()
 	{
-		String aircraftList;
+		//String aircraftList;
 		JSONArray planeArray;
 		
 		while (true)
 		{
+			/*I will use getPlaneArray()
 			aircraftList = getSentence();
 			System.out.println(aircraftList);
-			
+			*/
+
 			planeArray = server.getPlaneArray();
 			System.out.println(planeArray);
 		}		

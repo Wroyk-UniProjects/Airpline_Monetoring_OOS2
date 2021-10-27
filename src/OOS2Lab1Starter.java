@@ -5,7 +5,7 @@ public class OOS2Lab1Starter
 {
     private static double latitude = 48.7433;
     private static double longitude = 9.3201;
-    private static boolean haveConnection = false;
+    private static boolean haveConnection = true;
 
 	public static void main(String[] args)
 	{

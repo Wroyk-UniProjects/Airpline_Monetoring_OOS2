@@ -7,6 +7,7 @@ import org.json.*;
 
 import jsonstream.*;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -29,42 +30,43 @@ public class Senser implements Runnable
 	private void useStringOfSentences(AircraftSentenceFactory aircraftFactory, AircraftDisplay aircraftDisplay){
 
 		String aircraftList;
-		Vector<AircraftSentence> sentences = new Vector<AircraftSentence>();
+		Vector<AircraftSentence> aircraft = new Vector<AircraftSentence>();
 
 		aircraftList = getSentences();
-		System.out.println(aircraftList);
 
-		//TODO splitt aircraftList into seperad Sentences
+		String[] sentences = aircraftList.split("],");
 
-		sentences.add(aircraftFactory.createAircraftSentenceFromString(aircraftList));
+		Iterator<String> sentencesIterator = Arrays.stream(sentences).iterator();
+		while(sentencesIterator.hasNext()){
+			aircraft.add(aircraftFactory.createAircraftSentenceFromString(sentencesIterator.next() + "]"));
+		}
 
+		System.out.println("\nAircraft in Range: " + aircraft.size());
 
-		System.out.println("\nAircraft in Range: " + sentences.size());
-
-		Iterator<AircraftSentence> sentencesIterator = sentences.iterator();
-		while (sentencesIterator.hasNext()) {
-			aircraftDisplay.display(sentencesIterator.next());
+		Iterator<AircraftSentence> aircraftIterator = aircraft.iterator();
+		while (aircraftIterator.hasNext()) {
+			aircraftDisplay.display(aircraftIterator.next());
 		}
 	}
 
 	private void useJSONArrayOfSentences(AircraftSentenceFactory aircraftFactory, AircraftDisplay aircraftDisplay){
 
 		JSONArray planeArray;
-		Vector<AircraftSentence> sentences = new Vector<AircraftSentence>();
+		Vector<AircraftSentence> aircraft = new Vector<AircraftSentence>();
 
 		planeArray = server.getPlaneArray();
 		//System.out.println(planeArray);
 
 
 		for(int i = 0; i < planeArray.length(); i++){
-			sentences.add(aircraftFactory.createAircraftSentenceFromJSONArray(planeArray.getJSONArray(i)));
+			aircraft.add(aircraftFactory.createAircraftSentenceFromJSONArray(planeArray.getJSONArray(i)));
 		}
 
-		System.out.println("\nAircraft in Range: " + sentences.size());
+		System.out.println("\nAircraft in Range: " + aircraft.size());
 
-		Iterator<AircraftSentence> sentencesIterator = sentences.iterator();
-		while (sentencesIterator.hasNext()){
-			aircraftDisplay.display(sentencesIterator.next());
+		Iterator<AircraftSentence> aircraftIterator = aircraft.iterator();
+		while (aircraftIterator.hasNext()){
+			aircraftDisplay.display(aircraftIterator.next());
 		}
 	}
 	
@@ -76,9 +78,9 @@ public class Senser implements Runnable
 		while (true)
 		{
 
-			//this.useStringOfSentences(sentenceFactory, display);
+			this.useStringOfSentences(sentenceFactory, display);
 
-			this.useJSONArrayOfSentences(sentenceFactory, display);
+			//this.useJSONArrayOfSentences(sentenceFactory, display);
 
 		}		
 	}

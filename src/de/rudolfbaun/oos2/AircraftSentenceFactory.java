@@ -7,6 +7,15 @@ import java.util.List;
 
 public class AircraftSentenceFactory {
 
+    public AircraftSentence createAircraftSentenceFromJSONArray(String sentence){
+        return new AircraftSentence(sentence);
+    }
+
+    public AircraftSentence createAircraftSentenceFromJSONArray(JSONArray sentence){
+
+        return new AircraftSentence(sentence.toString());
+    }
+    /*
     public List<AircraftSentence> createAircraftSentencesFromJSONArray(JSONArray planeArray){
 
         List<AircraftSentence> sentences;
@@ -18,4 +27,5 @@ public class AircraftSentenceFactory {
         List<AircraftSentence> sentences;
         return sentences;
     }
+     */
 }

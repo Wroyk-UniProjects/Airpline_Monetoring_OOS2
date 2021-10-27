@@ -9,8 +9,8 @@ public class OOS2Lab1Starter
 
 	public static void main(String[] args)
 	{
-		//TODO urlString is read from args and a checked via regex
-		String urlString = "https://opensky-network.org/api/states/all";
+		//TODO a validation checked for args[0]
+		String urlString = args[0];
 		PlaneDataServer server;
 		
 		if(haveConnection)

@@ -1,0 +1,20 @@
+[
+  "3cc83d", //icao24
+  "DCS713  ", //callsing
+  "Germany", //origin_country
+  1635333619, //time_position
+  1635333619, //last_contact
+  10.035, //longitude
+  49.0927, //latitude
+  1310.64, //baro_altitude
+  false, //on_ground
+  98.37, //velocity
+  278.72, //true_track
+  -5.85, //vertical_rate
+  null, //sensors
+  1485.9, //geo_altitude
+  "1351", //squawk
+  false, //spi
+  0, //position_source
+  3 //?
+]

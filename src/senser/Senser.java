@@ -34,7 +34,7 @@ public class Senser implements Runnable
 
 		aircraftList = getSentences();
 
-		String[] sentences = aircraftList.split("(?<=\\]),");
+		String[] sentences = aircraftList.split("(?<=]),");
 
 		Iterator<String> sentencesIterator = Arrays.stream(sentences).iterator();
 		while(sentencesIterator.hasNext()){

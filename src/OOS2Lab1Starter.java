@@ -1,6 +1,9 @@
 import jsonstream.*;
 import senser.Senser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class OOS2Lab1Starter
 {
     private static double latitude = 48.7433;
@@ -9,7 +12,12 @@ public class OOS2Lab1Starter
 
 	public static void main(String[] args)
 	{
-		//TODO a validation checked for args[0]
+
+
+		if(!validateURL(args[0])){
+			System.out.println("Invalide API URL");
+			return;
+		}
 		String urlString = args[0];
 		PlaneDataServer server;
 		
@@ -21,5 +29,14 @@ public class OOS2Lab1Starter
 		Senser senser = new Senser(server);
 		new Thread(server).start();
 		new Thread(senser).start();// Why two times? Why is it not running with one?
+	}
+
+	private static boolean validateURL(String url){
+
+		Pattern regexPattern = Pattern.compile("https:/{2}(([0-9a-zA-Z-.]*/)|[0-9a-zA-Z-.&?=_])*");
+
+		Matcher matcher = regexPattern.matcher(url);
+
+		return matcher.matches();
 	}
 }

@@ -7,7 +7,8 @@ import java.util.List;
 
 public class AircraftSentenceFactory {
 
-    public AircraftSentence createAircraftSentenceFromJSONArray(String sentence){
+    public AircraftSentence createAircraftSentenceFromString(String sentence){
+
         return new AircraftSentence(sentence);
     }
 

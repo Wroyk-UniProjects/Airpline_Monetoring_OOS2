@@ -4,6 +4,6 @@ public class AircraftDisplay {
 
     public void display(AircraftSentence sentence) {
 
-        System.out.print(sentence.getAircraftAsString());
+        System.out.println(sentence.getAircraftAsString());
     }
 }

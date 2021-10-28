@@ -14,7 +14,7 @@ import java.util.Vector;
 public class Senser implements Runnable
 {
 	PlaneDataServer server;
-	Boolean debug =true;
+	Boolean debug = false;
 
 
 	public Senser(PlaneDataServer server)
@@ -27,15 +27,6 @@ public class Senser implements Runnable
 		String list = server.getPlaneListAsString();
 
 		return list.split("(?<=]),");
-	}
-
-	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
-		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
-
-		Iterator<AircraftSentence> aircraftIterator = aircraftSentences.iterator();
-		while (aircraftIterator.hasNext()) {
-			aircraftDisplay.display(aircraftIterator.next());
-		}
 	}
 
 	private Vector<AircraftSentence> createAircraftSentencesFromString(AircraftSentenceFactory aircraftFactory){
@@ -61,11 +52,21 @@ public class Senser implements Runnable
 
 		aircraftArray = server.getPlaneArray();
 
+		//Documentation says JSONArray has .iterator() different Version?
 		for(int i = 0; i < aircraftArray.length(); i++){
 			aircraftSentences.add(aircraftFactory.createAircraftSentenceFromJSONArray(aircraftArray.getJSONArray(i)));
 		}
 
 		return aircraftSentences;
+	}
+
+	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
+		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
+
+		Iterator<AircraftSentence> aircraftIterator = aircraftSentences.iterator();
+		while (aircraftIterator.hasNext()) {
+			aircraftDisplay.display(aircraftIterator.next());
+		}
 	}
 	
 	public void run()
@@ -82,7 +83,7 @@ public class Senser implements Runnable
 			if(debug) System.out.println("\n\nThies were created from String:");
 			displayAircraftSentences(aircraftSentencesFromString, display);
 
-			if(debug) System.out.println("\nThies were created from JSONArray:");
+			if(debug) System.out.println("\n\nThies were created from JSONArray:");
 			if(debug) displayAircraftSentences(aircraftSentencesFromJSONArray, display);
 
 

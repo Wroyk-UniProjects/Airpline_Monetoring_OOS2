@@ -14,6 +14,7 @@ import java.util.Vector;
 public class Senser implements Runnable
 {
 	PlaneDataServer server;
+	Boolean debug =true;
 
 
 	public Senser(PlaneDataServer server)
@@ -21,53 +22,50 @@ public class Senser implements Runnable
 		this.server = server;
 	}
 
-	private String getSentences()
+	private String[] getSentenceStrings()
 	{
 		String list = server.getPlaneListAsString();
-		return list;
+
+		return list.split("(?<=]),");
 	}
 
-	private void useStringOfSentences(AircraftSentenceFactory aircraftFactory, AircraftDisplay aircraftDisplay){
+	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
+		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
 
-		String aircraftList;
-		Vector<AircraftSentence> aircraft = new Vector<AircraftSentence>();
-
-		aircraftList = getSentences();
-
-		String[] sentences = aircraftList.split("(?<=]),");
-
-		Iterator<String> sentencesIterator = Arrays.stream(sentences).iterator();
-		while(sentencesIterator.hasNext()){
-			aircraft.add(aircraftFactory.createAircraftSentenceFromString(sentencesIterator.next()));
-		}
-
-		System.out.println("\nAircraft in Range: " + aircraft.size());
-
-		Iterator<AircraftSentence> aircraftIterator = aircraft.iterator();
+		Iterator<AircraftSentence> aircraftIterator = aircraftSentences.iterator();
 		while (aircraftIterator.hasNext()) {
 			aircraftDisplay.display(aircraftIterator.next());
 		}
 	}
 
-	private void useJSONArrayOfSentences(AircraftSentenceFactory aircraftFactory, AircraftDisplay aircraftDisplay){
+	private Vector<AircraftSentence> createAircraftSentencesFromString(AircraftSentenceFactory aircraftFactory){
 
-		JSONArray planeArray;
-		Vector<AircraftSentence> aircraft = new Vector<AircraftSentence>();
+		String[] sentences;
+		Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
 
-		planeArray = server.getPlaneArray();
-		//System.out.println(planeArray);
+		sentences = getSentenceStrings();
 
-
-		for(int i = 0; i < planeArray.length(); i++){
-			aircraft.add(aircraftFactory.createAircraftSentenceFromJSONArray(planeArray.getJSONArray(i)));
+		Iterator<String> sentencesIterator = Arrays.stream(sentences).iterator();
+		while(sentencesIterator.hasNext()){
+			AircraftSentence aircraftSentence = aircraftFactory.createAircraftSentenceFromString(sentencesIterator.next());
+			aircraftSentences.add(aircraftSentence);
 		}
 
-		System.out.println("\nAircraft in Range: " + aircraft.size());
+		return aircraftSentences;
+	}
 
-		Iterator<AircraftSentence> aircraftIterator = aircraft.iterator();
-		while (aircraftIterator.hasNext()){
-			aircraftDisplay.display(aircraftIterator.next());
+	private Vector<AircraftSentence> createAircraftSentencesFromJSONArray(AircraftSentenceFactory aircraftFactory){
+
+		JSONArray aircraftArray;
+		Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
+
+		aircraftArray = server.getPlaneArray();
+
+		for(int i = 0; i < aircraftArray.length(); i++){
+			aircraftSentences.add(aircraftFactory.createAircraftSentenceFromJSONArray(aircraftArray.getJSONArray(i)));
 		}
+
+		return aircraftSentences;
 	}
 	
 	public void run()
@@ -78,10 +76,16 @@ public class Senser implements Runnable
 		while (true)
 		{
 
-			this.useStringOfSentences(sentenceFactory, display);
+			Vector<AircraftSentence> aircraftSentencesFromString = this.createAircraftSentencesFromString(sentenceFactory);
+			Vector<AircraftSentence> aircraftSentencesFromJSONArray = this.createAircraftSentencesFromJSONArray(sentenceFactory);
 
-			//this.useJSONArrayOfSentences(sentenceFactory, display);
+			if(debug) System.out.println("\n\nThies were created from String:");
+			displayAircraftSentences(aircraftSentencesFromString, display);
 
-		}		
+			if(debug) System.out.println("\nThies were created from JSONArray:");
+			if(debug) displayAircraftSentences(aircraftSentencesFromJSONArray, display);
+
+
+		}
 	}
 }

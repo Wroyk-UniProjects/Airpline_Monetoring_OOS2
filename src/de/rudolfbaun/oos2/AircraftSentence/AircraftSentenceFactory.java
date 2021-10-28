@@ -1,19 +1,16 @@
-package de.rudolfbaun.oos2;
+package de.rudolfbaun.oos2.AircraftSentence;
 
-import jdk.jshell.spi.ExecutionControl;
 import org.json.JSONArray;
-
-import java.util.List;
 
 public class AircraftSentenceFactory {
 
     public AircraftSentence createAircraftSentenceFromString(String sentence){
-
+        //AircraftSentence.aircraft = sentence is an option
         return new AircraftSentence(sentence);
     }
 
     public AircraftSentence createAircraftSentenceFromJSONArray(JSONArray sentence){
-
+        //AircraftSentence.aircraft = sentence.toString() is an option
         return new AircraftSentence(sentence.toString());
     }
     /*

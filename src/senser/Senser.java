@@ -1,8 +1,7 @@
 package senser;
 
 import de.rudolfbaun.oos2.AircraftDisplay;
-import de.rudolfbaun.oos2.AircraftSentence;
-import de.rudolfbaun.oos2.AircraftSentenceFactory;
+import de.rudolfbaun.oos2.AircraftSentence.*;
 import org.json.*;
 
 import jsonstream.*;

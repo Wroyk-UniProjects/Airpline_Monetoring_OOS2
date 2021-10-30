@@ -13,7 +13,7 @@ import java.util.Vector;
 public class Senser implements Runnable
 {
 	PlaneDataServer server;
-	Boolean debug = false;
+	Boolean debug = true;
 
 
 	public Senser(PlaneDataServer server)
@@ -35,9 +35,8 @@ public class Senser implements Runnable
 
 		sentences = getSentenceStrings();
 
-		Iterator<String> sentencesIterator = Arrays.stream(sentences).iterator();
-		while(sentencesIterator.hasNext()){
-			AircraftSentence aircraftSentence = aircraftFactory.createAircraftSentenceFromString(sentencesIterator.next());
+		for (String sentence : sentences){
+			AircraftSentence aircraftSentence = aircraftFactory.createAircraftSentenceFromString(sentence);
 			aircraftSentences.add(aircraftSentence);
 		}
 

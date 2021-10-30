@@ -13,6 +13,7 @@ public class AircraftSentenceFactory {
         //AircraftSentence.aircraft = sentence.toString() is an option
         return new AircraftSentence(sentence.toString());
     }
+
     /*
     public List<AircraftSentence> createAircraftSentencesFromJSONArray(JSONArray planeArray){
 

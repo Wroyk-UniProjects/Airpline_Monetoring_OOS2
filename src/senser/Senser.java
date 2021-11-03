@@ -21,6 +21,7 @@ public class Senser implements Runnable
 		this.server = server;
 	}
 
+/*
 	private String[] getSentenceStrings()
 	{
 		String list = server.getPlaneListAsString();
@@ -57,6 +58,7 @@ public class Senser implements Runnable
 
 		return aircraftSentences;
 	}
+*/
 
 	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
 		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
@@ -75,8 +77,8 @@ public class Senser implements Runnable
 		while (true)
 		{
 
-			Vector<AircraftSentence> aircraftSentencesFromString = this.createAircraftSentencesFromString(sentenceFactory);
-			Vector<AircraftSentence> aircraftSentencesFromJSONArray = this.createAircraftSentencesFromJSONArray(sentenceFactory);
+			Vector<AircraftSentence> aircraftSentencesFromString = sentenceFactory.createAircraftSentenceVectorFromString(server.getPlaneListAsString());
+			Vector<AircraftSentence> aircraftSentencesFromJSONArray = sentenceFactory.createAircraftSentenceVectorFromJSONArray(server.getPlaneArray());
 
 			if(debug) System.out.println("\n\nThies were created from String:");
 			displayAircraftSentences(aircraftSentencesFromString, display);

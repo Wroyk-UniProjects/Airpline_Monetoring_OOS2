@@ -2,6 +2,8 @@ package de.rudolfbaun.oos2.AircraftSentence;
 
 import org.json.JSONArray;
 
+import java.util.Vector;
+
 public class AircraftSentenceFactory {
 
     public AircraftSentence createAircraftSentenceFromString(String sentence){
@@ -14,17 +16,29 @@ public class AircraftSentenceFactory {
         return new AircraftSentence(sentence.toString());
     }
 
-    /*
-    public List<AircraftSentence> createAircraftSentencesFromJSONArray(JSONArray planeArray){
+    public Vector<AircraftSentence> createAircraftSentenceVectorFromJSONArray(JSONArray planeArray){
 
-        List<AircraftSentence> sentences;
-        return sentences;
+        Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
+
+        //Documentation says JSONArray has .iterator() different Version?
+        for(int i = 0; i < planeArray.length(); i++){
+            aircraftSentences.add(this.createAircraftSentenceFromJSONArray(planeArray.getJSONArray(i)));
+        }
+
+        return aircraftSentences;
     }
 
-    public List<AircraftSentence> createAircraftSentencesFromString(String planeString){
+    public Vector<AircraftSentence> createAircraftSentenceVectorFromString(String planeString){
 
-        List<AircraftSentence> sentences;
-        return sentences;
+        Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
+
+        String[] sentences = planeString.split("(?<=]),");
+
+        for (String sentence : sentences){
+            AircraftSentence aircraftSentence = this.createAircraftSentenceFromString(sentence);
+            aircraftSentences.add(aircraftSentence);
+        }
+
+        return aircraftSentences;
     }
-     */
 }

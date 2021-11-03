@@ -12,4 +12,9 @@ public class AircraftSentence {
 
         return this.aircraft;
     }
+
+    @Override
+    public String toString(){
+        return this.aircraft;
+    }
 }

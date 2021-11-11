@@ -1,7 +1,10 @@
 import jsonstream.*;
 import messer.BasicAircraft;
+import messer.Coordinate;
 import senser.Senser;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +26,15 @@ public class OOS2Lab1Starter
 		PlaneDataServer server;
 
 		System.out.println(BasicAircraft.getAttributesNames());
+		try{
+			ArrayList<Object> arrayList = BasicAircraft.getAttributesValues(new BasicAircraft("1", "2", new Date(123333), new Coordinate(2.3,4.5),1.0, 45.6));
+			for ( Object o: arrayList) {
+				System.out.println(o);
+			}
+		}catch (Exception e){
+
+		}
+
 		
 		if(haveConnection)
 			server = new PlaneDataServer(urlString, latitude, longitude, 100);

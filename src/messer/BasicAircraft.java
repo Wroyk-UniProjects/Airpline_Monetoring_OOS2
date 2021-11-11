@@ -60,11 +60,17 @@ public class BasicAircraft {
 		return attributes;
 	}
 
-	public static ArrayList<Object> getAttributesValues(BasicAircraft ac)
-	{
+	public static ArrayList<Object> getAttributesValues(BasicAircraft ac) throws NoSuchFieldException, IllegalAccessException {
 		ArrayList<Object> attributes = new ArrayList<Object>();
 
-		// TODO: return needed values
+		ArrayList<String> attributeNames = getAttributesNames();
+		for (String attributeName: attributeNames) {
+			Field field = ac.getClass().getDeclaredField(attributeName);
+
+			attributes.add(field.get(ac));
+		}
+
+
 
 		return attributes;
 	}

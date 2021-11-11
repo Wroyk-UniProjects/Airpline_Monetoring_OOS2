@@ -48,8 +48,7 @@ public class BasicAircraft {
 		return trak;
 	}
 	
-	public static ArrayList<String> getAttributesNames()
-	{
+	public static ArrayList<String> getAttributesNames() {
 		ArrayList<String> attributes = new ArrayList<String>();
 
 		Field[] fields = BasicAircraft.class.getDeclaredFields();
@@ -65,7 +64,7 @@ public class BasicAircraft {
 
 		ArrayList<String> attributeNames = getAttributesNames();
 		for (String attributeName: attributeNames) {
-			Field field = ac.getClass().getDeclaredField(attributeName);
+			Field field = BasicAircraft.class.getDeclaredField(attributeName);
 
 			attributes.add(field.get(ac));
 		}

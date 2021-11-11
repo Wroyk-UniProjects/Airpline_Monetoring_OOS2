@@ -2,17 +2,21 @@ package senser;
 
 import de.rudolfbaun.oos2.AircraftDisplay;
 import de.rudolfbaun.oos2.AircraftSentence.*;
+import observer.Observable;
+import observer.Observer;
 import org.json.*;
 
 import jsonstream.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
-public class Senser implements Runnable
+public class Senser implements Runnable, Observable
 {
 	PlaneDataServer server;
+	ArrayList<Observer> observers;
 	Boolean debug = true;
 
 
@@ -20,45 +24,6 @@ public class Senser implements Runnable
 	{
 		this.server = server;
 	}
-
-/*
-	private String[] getSentenceStrings()
-	{
-		String list = server.getPlaneListAsString();
-
-		return list.split("(?<=]),");
-	}
-
-	private Vector<AircraftSentence> createAircraftSentencesFromString(AircraftSentenceFactory aircraftFactory){
-
-		String[] sentences;
-		Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
-
-		sentences = getSentenceStrings();
-
-		for (String sentence : sentences){
-			AircraftSentence aircraftSentence = aircraftFactory.createAircraftSentenceFromString(sentence);
-			aircraftSentences.add(aircraftSentence);
-		}
-
-		return aircraftSentences;
-	}
-
-	private Vector<AircraftSentence> createAircraftSentencesFromJSONArray(AircraftSentenceFactory aircraftFactory){
-
-		JSONArray aircraftArray;
-		Vector<AircraftSentence> aircraftSentences = new Vector<AircraftSentence>();
-
-		aircraftArray = server.getPlaneArray();
-
-		//Documentation says JSONArray has .iterator() different Version?
-		for(int i = 0; i < aircraftArray.length(); i++){
-			aircraftSentences.add(aircraftFactory.createAircraftSentenceFromJSONArray(aircraftArray.getJSONArray(i)));
-		}
-
-		return aircraftSentences;
-	}
-*/
 
 	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
 		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
@@ -88,5 +53,55 @@ public class Senser implements Runnable
 
 
 		}
+	}
+
+	@Override
+	public void addObserver(Observer o) {
+		observers.add(o);
+	}
+
+	@Override
+	public void deleteObserver(Observer o) {
+		observers.remove( 0);
+	}
+
+	@Override
+	public void notifyObservers() {
+		notifyObservers(null);
+	}
+
+	@Override
+	public void notifyObservers(Object arg) {
+		if(!changed)
+			return;
+		clearChanged();
+		for (Observer o: observers) {
+			o.update(this,arg);
+		}
+	}
+
+	@Override
+	public void deleteObservers() {
+
+	}
+
+	@Override
+	public void setChanged() {
+
+	}
+
+	@Override
+	public void clearChanged() {
+
+	}
+
+	@Override
+	public boolean hasChanged() {
+		return false;
+	}
+
+	@Override
+	public int countObservers() {
+		return 0;
 	}
 }

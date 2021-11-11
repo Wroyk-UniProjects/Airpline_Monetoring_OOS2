@@ -25,15 +25,6 @@ public class OOS2Lab1Starter
 		String urlString = args[0];
 		PlaneDataServer server;
 
-		System.out.println(BasicAircraft.getAttributesNames());
-		try{
-			ArrayList<Object> arrayList = BasicAircraft.getAttributesValues(new BasicAircraft("1", "2", new Date(123333), new Coordinate(2.3,4.5),1.0, 45.6));
-			for ( Object o: arrayList) {
-				System.out.println(o);
-			}
-		}catch (Exception e){
-
-		}
 
 		
 		if(haveConnection)
@@ -42,8 +33,8 @@ public class OOS2Lab1Starter
 			server = new PlaneDataServer(latitude, longitude, 150);
 
 		Senser senser = new Senser(server);
-		//new Thread(server).start();
-		//new Thread(senser).start();// Why two times? Why is it not running with one?
+		new Thread(server).start();
+		new Thread(senser).start();// Why two times? Why is it not running with one?
 	}
 
 	private static boolean validateURL(String url){

@@ -1,6 +1,7 @@
 import jsonstream.*;
 import messer.BasicAircraft;
 import messer.Coordinate;
+import messer.Messer;
 import senser.Senser;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class OOS2Lab1Starter
 {
     private static double latitude = 48.7433;
     private static double longitude = 9.3201;
-    private static boolean haveConnection = false;
+    private static boolean haveConnection = true;
 
 	public static void main(String[] args)
 	{
@@ -26,15 +27,18 @@ public class OOS2Lab1Starter
 		PlaneDataServer server;
 
 
-		
 		if(haveConnection)
 			server = new PlaneDataServer(urlString, latitude, longitude, 100);
 		else
 			server = new PlaneDataServer(latitude, longitude, 150);
 
+
 		Senser senser = new Senser(server);
 		new Thread(server).start();
 		new Thread(senser).start();// Why two times? Why is it not running with one?
+
+		Messer messer = new Messer();
+		senser.addObserver(messer);
 	}
 
 	private static boolean validateURL(String url){

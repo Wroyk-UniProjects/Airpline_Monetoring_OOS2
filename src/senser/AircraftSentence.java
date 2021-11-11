@@ -1,4 +1,4 @@
-package de.rudolfbaun.oos2.AircraftSentence;
+package senser;
 
 public class AircraftSentence {
     protected String aircraft;

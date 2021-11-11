@@ -1,6 +1,4 @@
-package de.rudolfbaun.oos2;
-
-import de.rudolfbaun.oos2.AircraftSentence.AircraftSentence;
+package senser;
 
 public class AircraftDisplay {
 

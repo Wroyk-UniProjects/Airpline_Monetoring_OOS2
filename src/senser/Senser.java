@@ -1,28 +1,26 @@
 package senser;
 
-import de.rudolfbaun.oos2.AircraftDisplay;
-import de.rudolfbaun.oos2.AircraftSentence.*;
+import messer.Messer;
 import observer.Observable;
 import observer.Observer;
-import org.json.*;
 
 import jsonstream.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 public class Senser implements Runnable, Observable
 {
 	PlaneDataServer server;
 	ArrayList<Observer> observers;
-	Boolean debug = true;
+	Vector<AircraftSentence> aircraftSentences;
+	boolean changed = false;
+	boolean debug = true;
 
 
 	public Senser(PlaneDataServer server)
 	{
 		this.server = server;
+		this.observers = new ArrayList<Observer>();
 	}
 
 	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
@@ -41,16 +39,11 @@ public class Senser implements Runnable, Observable
 		
 		while (true)
 		{
-
-			Vector<AircraftSentence> aircraftSentencesFromString = sentenceFactory.createAircraftSentenceVectorFromString(server.getPlaneListAsString());
-			Vector<AircraftSentence> aircraftSentencesFromJSONArray = sentenceFactory.createAircraftSentenceVectorFromJSONArray(server.getPlaneArray());
-
-			if(debug) System.out.println("\n\nThies were created from String:");
-			displayAircraftSentences(aircraftSentencesFromString, display);
-
-			if(debug) System.out.println("\n\nThies were created from JSONArray:");
-			if(debug) displayAircraftSentences(aircraftSentencesFromJSONArray, display);
-
+			System.out.println("run");
+			aircraftSentences = sentenceFactory.createAircraftSentenceVectorFromString(server.getPlaneListAsString());
+			setChanged();
+			if(debug) displayAircraftSentences(aircraftSentences, display);
+			notifyObservers();
 
 		}
 	}
@@ -82,26 +75,26 @@ public class Senser implements Runnable, Observable
 
 	@Override
 	public void deleteObservers() {
-
+		observers.clear();
 	}
 
 	@Override
 	public void setChanged() {
-
+		changed = true;
 	}
 
 	@Override
 	public void clearChanged() {
-
+		changed = false;
 	}
 
 	@Override
 	public boolean hasChanged() {
-		return false;
+		return changed;
 	}
 
 	@Override
 	public int countObservers() {
-		return 0;
+		return observers.size();
 	}
 }

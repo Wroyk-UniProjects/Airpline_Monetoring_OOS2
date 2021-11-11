@@ -10,6 +10,6 @@ public class Messer implements Observer {
 
     @Override
     public void update(Observable observable, Object newValue) {
-
+        System.out.println("test");
     }
 }

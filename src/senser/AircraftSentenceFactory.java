@@ -1,4 +1,4 @@
-package de.rudolfbaun.oos2.AircraftSentence;
+package senser;
 
 import org.json.JSONArray;
 

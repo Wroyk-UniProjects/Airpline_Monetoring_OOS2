@@ -52,7 +52,10 @@ public class BasicAircraft {
 	{
 		ArrayList<String> attributes = new ArrayList<String>();
 
-		// TODO: return needed names
+		Field[] fields = BasicAircraft.class.getDeclaredFields();
+		for (Field field: fields) {
+			attributes.add(field.getName());
+		}
 		
 		return attributes;
 	}

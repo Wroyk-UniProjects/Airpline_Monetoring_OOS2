@@ -1,4 +1,5 @@
 import jsonstream.*;
+import messer.BasicAircraft;
 import senser.Senser;
 
 import java.util.regex.Matcher;
@@ -20,6 +21,8 @@ public class OOS2Lab1Starter
 		}
 		String urlString = args[0];
 		PlaneDataServer server;
+
+		System.out.println(BasicAircraft.getAttributesNames());
 		
 		if(haveConnection)
 			server = new PlaneDataServer(urlString, latitude, longitude, 100);
@@ -27,8 +30,8 @@ public class OOS2Lab1Starter
 			server = new PlaneDataServer(latitude, longitude, 150);
 
 		Senser senser = new Senser(server);
-		new Thread(server).start();
-		new Thread(senser).start();// Why two times? Why is it not running with one?
+		//new Thread(server).start();
+		//new Thread(senser).start();// Why two times? Why is it not running with one?
 	}
 
 	private static boolean validateURL(String url){

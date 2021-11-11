@@ -12,15 +12,17 @@ public class BasicAircraft {
 	private Coordinate coordinate;
 	private Double speed;
 	private Double trak;
+	private Integer altitude;
 
 	
-	public BasicAircraft (String icao, String operator, Date posTime, Coordinate coordinate, double speed, double trak) {
+	public BasicAircraft (String icao, String operator, Date posTime, Coordinate coordinate, double speed, double trak, int altitude) {
 		this.icao = icao;
 		this.operator = operator;
 		this.posTime = posTime;
 		this.coordinate = coordinate;
 		this.speed = speed;
 		this.trak = trak;
+		this.altitude = altitude;
 	}
 
 	
@@ -47,6 +49,10 @@ public class BasicAircraft {
 	public double getTrak() {
 		return trak;
 	}
+
+	public Integer getAltitude() {
+		return altitude;
+	}
 	
 	public static ArrayList<String> getAttributesNames() {
 		ArrayList<String> attributes = new ArrayList<String>();
@@ -68,8 +74,6 @@ public class BasicAircraft {
 
 			attributes.add(field.get(ac));
 		}
-
-
 
 		return attributes;
 	}

@@ -2,7 +2,10 @@ package messer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class BasicAircraft {
@@ -25,7 +28,6 @@ public class BasicAircraft {
 		this.altitude = altitude;
 	}
 
-	
 	public String getIcao() {
 		return icao;
 	}
@@ -54,21 +56,16 @@ public class BasicAircraft {
 		return altitude;
 	}
 	
-	public static ArrayList<String> getAttributesNames() {
-		ArrayList<String> attributes = new ArrayList<String>();
+	public static List<String> getAttributesNames() {
 
 		Field[] fields = BasicAircraft.class.getDeclaredFields();
-		for (Field field: fields) {
-			attributes.add(field.getName());
-		}
-		
-		return attributes;
+		return Arrays.stream(fields).map(Field::getName).collect(Collectors.toList());
 	}
 
-	public static ArrayList<Object> getAttributesValues(BasicAircraft ac) throws NoSuchFieldException, IllegalAccessException {
-		ArrayList<Object> attributes = new ArrayList<Object>();
+	public static List<Object> getAttributesValues(BasicAircraft ac) throws NoSuchFieldException, IllegalAccessException {
+		List<Object> attributes = new ArrayList<Object>();
 
-		ArrayList<String> attributeNames = getAttributesNames();
+		List<String> attributeNames = getAttributesNames();
 		for (String attributeName: attributeNames) {
 			Field field = BasicAircraft.class.getDeclaredField(attributeName);
 

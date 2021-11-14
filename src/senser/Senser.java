@@ -8,27 +8,26 @@ import jsonstream.*;
 
 import java.util.*;
 
-public class Senser implements Runnable, Observable
+public class Senser implements Runnable, Observable<List<AircraftSentence>>
 {
 	PlaneDataServer server;
-	ArrayList<Observer> observers;
-	Vector<AircraftSentence> aircraftSentences;
-	boolean changed = false;
-	boolean debug = true;
+	private List<Observer<List<AircraftSentence>>> observers;
+	private List<AircraftSentence> aircraftSentences;
+	private boolean changed = false;
+	private boolean debug = false;
 
 
 	public Senser(PlaneDataServer server)
 	{
 		this.server = server;
-		this.observers = new ArrayList<Observer>();
+		this.observers = new ArrayList<Observer<List<AircraftSentence>>>();
 	}
 
-	private void displayAircraftSentences(Vector<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
+	private void displayAircraftSentences(List<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){
 		System.out.println("\nThere are " + aircraftSentences.size() + " Aircraft in range.");
 
-		Iterator<AircraftSentence> aircraftIterator = aircraftSentences.iterator();
-		while (aircraftIterator.hasNext()) {
-			aircraftDisplay.display(aircraftIterator.next());
+		for (AircraftSentence aircraftSentence : aircraftSentences) {
+			aircraftDisplay.display(aircraftSentence);
 		}
 	}
 	
@@ -43,18 +42,18 @@ public class Senser implements Runnable, Observable
 			aircraftSentences = sentenceFactory.createAircraftSentenceVectorFromString(server.getPlaneListAsString());
 			setChanged();
 			if(debug) displayAircraftSentences(aircraftSentences, display);
-			notifyObservers();
+			notifyObservers(aircraftSentences);
 
 		}
 	}
 
 	@Override
-	public void addObserver(Observer o) {
+	public void addObserver(Observer<List<AircraftSentence>> o) {
 		observers.add(o);
 	}
 
 	@Override
-	public void deleteObserver(Observer o) {
+	public void deleteObserver(Observer<List<AircraftSentence>> o) {
 		observers.remove( 0);
 	}
 
@@ -64,11 +63,11 @@ public class Senser implements Runnable, Observable
 	}
 
 	@Override
-	public void notifyObservers(Object arg) {
+	public void notifyObservers(List<AircraftSentence> arg) {
 		if(!changed)
 			return;
 		clearChanged();
-		for (Observer o: observers) {
+		for (Observer<List<AircraftSentence>> o: observers) {
 			o.update(this,arg);
 		}
 	}

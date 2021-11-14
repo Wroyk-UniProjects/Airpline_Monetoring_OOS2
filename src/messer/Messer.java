@@ -2,14 +2,17 @@ package messer;
 
 import observer.Observable;
 import observer.Observer;
+import senser.AircraftSentence;
 
-public class Messer implements Observer {
+import java.util.List;
+
+public class Messer implements Observer<List<AircraftSentence>> {
 
 
     public Messer(){}
 
     @Override
-    public void update(Observable observable, Object newValue) {
-        System.out.println("test");
+    public void update(Observable<List<AircraftSentence>> observable, List<AircraftSentence> newValue) {
+        System.out.println(newValue.toString());
     }
 }

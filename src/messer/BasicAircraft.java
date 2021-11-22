@@ -78,6 +78,6 @@ public class BasicAircraft {
 	@Override
 	public String toString() {
 		return "BasicAircraft [icao=" + icao + ", operator=" + operator + ", posTime=" + posTime
-				+ ", " + coordinate + coordinate + ", speed=" + speed + ", trak =" + trak + ", baro_altitude =" + altitude + "]";
+				+ ", " + coordinate + ", speed=" + speed + ", trak =" + trak + ", baro_altitude =" + altitude + "]";
 	}
 }

@@ -1,11 +1,8 @@
 package senser;
 
-import messer.Messer;
 import observer.Observable;
 import observer.Observer;
-
 import jsonstream.*;
-
 import java.util.*;
 
 public class Senser implements Runnable, Observable<AircraftSentence>
@@ -19,7 +16,7 @@ public class Senser implements Runnable, Observable<AircraftSentence>
 	public Senser(PlaneDataServer server)
 	{
 		this.server = server;
-		this.observers = new ArrayList<Observer<AircraftSentence>>();
+		this.observers = new ArrayList<>();
 	}
 
 	private void displayAircraftSentences(List<AircraftSentence> aircraftSentences, AircraftDisplay aircraftDisplay){

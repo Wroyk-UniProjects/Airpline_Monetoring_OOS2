@@ -1,20 +1,20 @@
 [
-  "3cc83d",   //icao24 <--
-  "DCS713  ", //callsing <--
-  "Germany",  //origin_country
-  1635333619, //time_position <--
-  1635333619, //last_contact
-  10.035,     //longitude <--
-  49.0927,    //latitude <--
-  1310.64,    //baro_altitude
-  false,      //on_ground
-  98.37,      //velocity <--
-  278.72,     //true_track <--
-  -5.85,      //vertical_rate
-  null,       //sensors
-  1485.9,     //geo_altitude
-  "1351",     //squawk
-  false,      //spi
-  0,          //position_source
-  3           //? nicht mehr da
+  "3cc83d",   //icao24 <-- 0
+  "DCS713  ", //callsing <--1
+  "Germany",  //origin_country2
+  1635333619, //time_position <--3
+  1635333619, //last_contact 4
+  10.035,     //longitude <-- 5
+  49.0927,    //latitude <-- 6
+  1310.64,    //baro_altitude 7
+  false,      //on_ground 8
+  98.37,      //velocity <-- 9
+  278.72,     //true_track <-- 10
+  -5.85,      //vertical_rate 11
+  null,       //sensors 12
+  1485.9,     //geo_altitude 13
+  "1351",     //squawk 14
+  false,      //spi 15
+  0,          //position_source 16
+  3           //? nicht mehr da 17
 ]

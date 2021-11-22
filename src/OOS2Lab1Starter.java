@@ -1,11 +1,7 @@
 import jsonstream.*;
-import messer.BasicAircraft;
-import messer.Coordinate;
 import messer.Messer;
 import senser.Senser;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +35,9 @@ public class OOS2Lab1Starter
 
 		Messer messer = new Messer();
 		senser.addObserver(messer);
+
+		new Thread(messer).start();
+
 	}
 
 	private static boolean validateURL(String url){

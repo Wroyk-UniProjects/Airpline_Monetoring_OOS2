@@ -34,7 +34,6 @@ public class Senser implements Runnable, Observable<AircraftSentence>
 		
 		while (true)
 		{
-			System.out.println("run");
 			List<AircraftSentence> aircraftSentences = sentenceFactory.createAircraftSentenceVectorFromString(server.getPlaneListAsString());
 			if(debug) displayAircraftSentences(aircraftSentences, display);
 			for(AircraftSentence aircraftSentence: aircraftSentences){

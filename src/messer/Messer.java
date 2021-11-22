@@ -22,10 +22,13 @@ public class Messer implements Runnable, Observer<AircraftSentence> {
 
     @Override
     public void run() {
-
+        AircraftFactory factory = new AircraftFactory();
 
         while (true){
-            AircraftSentence aircraftSentence = aircraftSentenceQueue.pollFirst();
+            if(aircraftSentenceQueue.peekFirst()!= null){
+                BasicAircraft basicAircraft = factory.newBasicAircraftFromAircraftSentence(aircraftSentenceQueue.pollFirst());
+            }
+
         }
     }
 }

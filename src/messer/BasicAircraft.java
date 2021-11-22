@@ -15,10 +15,10 @@ public class BasicAircraft {
 	private Coordinate coordinate;
 	private Double speed;
 	private Double trak;
-	private Integer altitude;
+	private Double altitude;
 
 	
-	public BasicAircraft (String icao, String operator, Date posTime, Coordinate coordinate, double speed, double trak, int altitude) {
+	public BasicAircraft (String icao, String operator, Date posTime, Coordinate coordinate, double speed, double trak, double altitude) {
 		this.icao = icao;
 		this.operator = operator;
 		this.posTime = posTime;
@@ -52,7 +52,7 @@ public class BasicAircraft {
 		return trak;
 	}
 
-	public Integer getAltitude() {
+	public double getAltitude() {
 		return altitude;
 	}
 	
@@ -78,6 +78,6 @@ public class BasicAircraft {
 	@Override
 	public String toString() {
 		return "BasicAircraft [icao=" + icao + ", operator=" + operator + ", posTime=" + posTime
-				+ ", " + coordinate + coordinate + ", speed=" + speed + ", trak =" + trak + "]";
+				+ ", " + coordinate + coordinate + ", speed=" + speed + ", trak =" + trak + ", baro_altitude =" + altitude + "]";
 	}
 }

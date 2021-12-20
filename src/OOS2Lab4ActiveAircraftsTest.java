@@ -42,9 +42,10 @@ public class OOS2Lab4ActiveAircraftsTest
 				e.printStackTrace();
 			}
 			HashMap<String, BasicAircraft> aircrafts = activeAircrafts.values();
+			//activeAircrafts.clear();
 			
 			System.out.println("Aircrafts in Hashtable " + aircrafts.size());
-			for(BasicAircraft ba : aircrafts) {
+			for(BasicAircraft ba : aircrafts.values()) {
 				System.out.println(ba);
 			}
 		}

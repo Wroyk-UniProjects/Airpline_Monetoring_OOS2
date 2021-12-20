@@ -32,7 +32,9 @@ public class Messer implements Runnable, Observer<AircraftSentence>, Observable<
         while (true){
             if(aircraftSentenceQueue.peekFirst()!= null){
                 BasicAircraft basicAircraft = factory.newBasicAircraftFromAircraftSentence(aircraftSentenceQueue.pollFirst());
-                display.display(basicAircraft);
+                setChanged();
+                notifyObservers(basicAircraft);
+                //display.display(basicAircraft);
             }
 
         }

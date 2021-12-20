@@ -17,3 +17,7 @@ hs_err_pid*
 /bin/
 
 .idea/uiDesigner.xml
+
+openjfx-17.0.1_monocle-windows-x64_bin-sdk.zip
+
+libs/javafx-sdk-17.0.1/

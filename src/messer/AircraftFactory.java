@@ -10,7 +10,7 @@ import static java.lang.Double.NaN;
 
 public class AircraftFactory {
     protected BasicAircraft newBasicAircraftFromAircraftSentence(AircraftSentence aircraftSentence){
-        System.out.println(aircraftSentence);
+        //System.out.println(aircraftSentence);
         JSONArray sentence = new JSONArray(aircraftSentence.getAircraftAsString());
 
         String icao = "null";
@@ -26,7 +26,7 @@ public class AircraftFactory {
             posTime = new Date(sentence.getLong(3));
 
 
-        Coordinate coordinate = null;
+        Coordinate coordinate = new Coordinate(NaN, NaN);
         if(!sentence.isNull(5) && !sentence.isNull(6))
             coordinate = new Coordinate(sentence.getDouble(5), sentence.getDouble(6));
 

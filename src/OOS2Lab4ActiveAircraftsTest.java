@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import acamo.ActiveAircrafts;
 import jsonstream.*;
@@ -40,7 +41,7 @@ public class OOS2Lab4ActiveAircraftsTest
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			ArrayList<BasicAircraft> aircrafts = activeAircrafts.values();
+			HashMap<String, BasicAircraft> aircrafts = activeAircrafts.values();
 			
 			System.out.println("Aircrafts in Hashtable " + aircrafts.size());
 			for(BasicAircraft ba : aircrafts) {

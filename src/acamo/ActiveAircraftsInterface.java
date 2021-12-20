@@ -1,6 +1,7 @@
 package acamo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import messer.BasicAircraft;
 
@@ -12,6 +13,6 @@ public interface ActiveAircraftsInterface {
 
 	public BasicAircraft retrieve(String icao);
 
-	public ArrayList<BasicAircraft> values ();
+	public HashMap<String,BasicAircraft> values ();
 
 }

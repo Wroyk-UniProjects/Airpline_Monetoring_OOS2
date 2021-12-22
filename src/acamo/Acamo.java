@@ -1,32 +1,38 @@
 package acamo;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import jsonstream.PlaneDataServer;
 import messer.BasicAircraft;
+import messer.Coordinate;
 import messer.Messer;
 import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class Acamo extends Application implements Observer<BasicAircraft> {
 
-    private static Messer messer;
+    private static Messer MESSER;
     private ActiveAircrafts activeAircrafts;
+    private TitledPane detailPane;
 
     @Override
     public void start(Stage stage) throws Exception {
         this.activeAircrafts = new ActiveAircrafts();
-        messer.addObserver(activeAircrafts);
-        messer.addObserver(this);
+        MESSER.addObserver(activeAircrafts);
+        MESSER.addObserver(this);
 
         int width = 640;
         int height = 480;
@@ -41,23 +47,49 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         splitPane.setDividerPositions(0.6);
 
 
+        /*
+            Create the Aircraft Table
+        */
         TableView<BasicAircraft> aircraftTable = new TableView<>();
         //aircraftTable.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(2), BorderWidths.DEFAULT)));
+
+        // Defining the columns
+        TableColumn<BasicAircraft, String> colIcao = new TableColumn<>("ICAO");
+        TableColumn<BasicAircraft, String> colOperator = new TableColumn<>("Operator");
+        TableColumn<BasicAircraft, Date> colPosTime = new TableColumn<>("posTime");
+        TableColumn<BasicAircraft, Coordinate> colCoordinate = new TableColumn<>("Coordinate");
+        TableColumn<BasicAircraft, Double> colSpeed = new TableColumn<>("Speed");
+        TableColumn<BasicAircraft, Double> colTrak = new TableColumn<>("Trak");
+        TableColumn<BasicAircraft, Double> colAltitude = new TableColumn<>("Altitude");
+
+        // Defining Factorys
+        colIcao.setCellValueFactory( new PropertyValueFactory<>("icao"));
+        colOperator.setCellValueFactory( new PropertyValueFactory<>("operator"));
+        colPosTime.setCellValueFactory( new PropertyValueFactory<>("posTime"));
+        colOperator.setCellValueFactory( new PropertyValueFactory<>("coordinate"));
+        colSpeed.setCellValueFactory( new PropertyValueFactory<>("speed"));
+        colTrak.setCellValueFactory( new PropertyValueFactory<>("trak"));
+        colAltitude.setCellValueFactory( new PropertyValueFactory<>("altitude"));
+
+
+        aircraftTable.getColumns().addAll(colIcao, colOperator, colPosTime, colCoordinate, colSpeed, colTrak, colAltitude);
+
 
         /*
             Create the detail UI
         */
         AnchorPane detailAnchor = new AnchorPane();
 
-        TitledPane detailPane = new TitledPane();
+        this.detailPane = new TitledPane();
         //detailPane.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
-        detailPane.setCollapsible(false);
-        detailPane.setText("No Aircraft selected");
-        detailPane.setPadding(new Insets(16,4,16,4));
-        AnchorPane.setTopAnchor(detailPane,0.);
-        AnchorPane.setRightAnchor(detailPane,0.);
-        AnchorPane.setBottomAnchor(detailPane,0.);
-        AnchorPane.setLeftAnchor(detailPane,0.);
+        this.detailPane.setCollapsible(false);
+        this.detailPane.setMinWidth(0);
+        this.detailPane.setText("No Aircraft selected");
+        this.detailPane.setPadding(new Insets(16,4,16,4));
+        AnchorPane.setTopAnchor(this.detailPane,0.);
+        AnchorPane.setRightAnchor(this.detailPane,0.);
+        AnchorPane.setBottomAnchor(this.detailPane,0.);
+        AnchorPane.setLeftAnchor(this.detailPane,0.);
 
         VBox detailContent = new VBox();
         detailContent.setFillWidth(true);
@@ -72,8 +104,8 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         splitPane.getItems().add(aircraftTable);
 
         splitPane.getItems().add(detailAnchor);
-        detailAnchor.getChildren().add(detailPane);
-        detailPane.setContent(detailContent);
+        detailAnchor.getChildren().add(this.detailPane);
+        this.detailPane.setContent(detailContent);
         detailContent.getChildren().add(detailPlaceholderLabel);
 
 
@@ -104,9 +136,9 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         new Thread(server).start();
         new Thread(senser).start();
 
-        Acamo.messer = new Messer();
-        senser.addObserver(messer);
-        new Thread(messer).start();
+        Acamo.MESSER = new Messer();
+        senser.addObserver(MESSER);
+        new Thread(MESSER).start();
 
         launch();
     }

@@ -22,7 +22,7 @@ public class AircraftFactory {
 
         Date posTime = null;
         if(!sentence.isNull(3))
-            posTime = new Date(sentence.getLong(3));
+            posTime = new Date(sentence.getLong(3)*1000);// posTime is in seconds Date requests in milliseconds
 
 
         Coordinate coordinate = new Coordinate(NaN, NaN);

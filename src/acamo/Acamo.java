@@ -133,7 +133,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private void updateTableItems(){
         for (BasicAircraft aircraft : this.activeAircrafts.values()){
 
-            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() >= 15){
+            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() >= 15000){
                 activeAircrafts.remove(aircraft.getIcao());
                 System.out.println(aircraft.getIcao());
             }

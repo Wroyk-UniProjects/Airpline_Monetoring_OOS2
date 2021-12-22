@@ -4,11 +4,11 @@ import messer.BasicAircraft;
 import observer.Observable;
 import observer.Observer;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveAircrafts implements ActiveAircraftsInterface, Observer<BasicAircraft> {
 
-    HashMap<String, BasicAircraft> aircraftHashMap = new HashMap<>();
+    ConcurrentHashMap<String, BasicAircraft> aircraftHashMap = new ConcurrentHashMap<>();
 
     @Override
     public void store(String icao, BasicAircraft aircraft) {
@@ -26,7 +26,7 @@ public class ActiveAircrafts implements ActiveAircraftsInterface, Observer<Basic
     }
 
     @Override
-    public HashMap<String, BasicAircraft> values() {
+    public ConcurrentHashMap<String, BasicAircraft> values() {
         return aircraftHashMap;
     }
 

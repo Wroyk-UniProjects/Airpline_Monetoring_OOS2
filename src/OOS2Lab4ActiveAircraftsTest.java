@@ -4,6 +4,7 @@ import messer.BasicAircraft;
 import messer.Messer;
 import senser.Senser;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OOS2Lab4ActiveAircraftsTest
@@ -40,11 +41,11 @@ public class OOS2Lab4ActiveAircraftsTest
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			ConcurrentHashMap<String, BasicAircraft> aircrafts = activeAircrafts.values();
+			ArrayList<BasicAircraft> aircrafts = (ArrayList<BasicAircraft>) activeAircrafts.values();
 			//activeAircrafts.clear();
 			
 			System.out.println("Aircrafts in Hashtable " + aircrafts.size());
-			for(BasicAircraft ba : aircrafts.values()) {
+			for(BasicAircraft ba : aircrafts) {
 				System.out.println(ba);
 			}
 		}

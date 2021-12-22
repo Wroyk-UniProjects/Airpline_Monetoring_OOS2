@@ -4,6 +4,8 @@ import messer.BasicAircraft;
 import observer.Observable;
 import observer.Observer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveAircrafts implements ActiveAircraftsInterface, Observer<BasicAircraft> {
@@ -20,14 +22,18 @@ public class ActiveAircrafts implements ActiveAircraftsInterface, Observer<Basic
         aircraftHashMap.clear();
     }
 
+    public void remove(String icao){
+        aircraftHashMap.remove(icao);
+    }
+
     @Override
     public BasicAircraft retrieve(String icao) {
         return aircraftHashMap.get(icao);
     }
 
     @Override
-    public ConcurrentHashMap<String, BasicAircraft> values() {
-        return aircraftHashMap;
+    public List<BasicAircraft> values() {
+        return new ArrayList<>(aircraftHashMap.values());
     }
 
     @Override

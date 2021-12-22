@@ -2,6 +2,8 @@ package acamo;
 
 import messer.BasicAircraft;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public interface ActiveAircraftsInterface {
@@ -12,6 +14,6 @@ public interface ActiveAircraftsInterface {
 
 	public BasicAircraft retrieve(String icao);
 
-	public ConcurrentHashMap<String, BasicAircraft> values ();
+	public List<BasicAircraft> values ();
 
 }

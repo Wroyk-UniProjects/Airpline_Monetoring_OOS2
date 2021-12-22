@@ -26,6 +26,8 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static Messer MESSER;
     private ActiveAircrafts activeAircrafts;
+    private boolean queued = false;
+    private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
 
     @Override
@@ -74,6 +76,9 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         aircraftTable.getColumns().addAll(colIcao, colOperator, colPosTime, colCoordinate, colSpeed, colTrak, colAltitude);
 
+        this.aircraftTableItems = FXCollections.observableArrayList();
+        this.aircraftTableItems.addAll(this.activeAircrafts.values());
+        aircraftTable.setItems(this.aircraftTableItems);
 
         /*
             Create the detail UI
@@ -117,6 +122,25 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     @Override
     public void update(Observable<BasicAircraft> observable, BasicAircraft newValue) {
         System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
+        if(!this.queued){
+            this.queued = true;
+
+            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.schedule(this::updateTableItems, 1, TimeUnit.SECONDS);
+        }
+    }
+
+    private void updateTableItems(){
+        for (BasicAircraft aircraft : this.activeAircrafts.values()){
+
+            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() >= 15){
+                activeAircrafts.remove(aircraft.getIcao());
+                System.out.println(aircraft.getIcao());
+            }
+        }
+        this.aircraftTableItems.clear();
+        this.aircraftTableItems.addAll(this.activeAircrafts.values());
+        this.queued = false;
     }
 
     public static void main(String[] args) {

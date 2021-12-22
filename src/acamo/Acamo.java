@@ -32,8 +32,50 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         int height = 480;
 
         AnchorPane root = new AnchorPane();
+        SplitPane splitPane = new SplitPane();
+        AnchorPane.setTopAnchor(splitPane,0.);
+        AnchorPane.setLeftAnchor(splitPane,0.);
+        AnchorPane.setBottomAnchor(splitPane,0.);
+        AnchorPane.setRightAnchor(splitPane,0.);
+        //splitPane.setPadding(new Insets(8));
+        splitPane.setDividerPositions(0.6);
 
+
+        TableView<BasicAircraft> aircraftTable = new TableView<>();
+        //aircraftTable.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(2), BorderWidths.DEFAULT)));
+
+        /*
+            Create the detail UI
+        */
+        AnchorPane detailAnchor = new AnchorPane();
+
+        TitledPane detailPane = new TitledPane();
+        //detailPane.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
+        detailPane.setCollapsible(false);
+        detailPane.setText("No Aircraft selected");
+        detailPane.setPadding(new Insets(16,4,16,4));
+        AnchorPane.setTopAnchor(detailPane,0.);
+        AnchorPane.setRightAnchor(detailPane,0.);
+        AnchorPane.setBottomAnchor(detailPane,0.);
+        AnchorPane.setLeftAnchor(detailPane,0.);
+
+        VBox detailContent = new VBox();
+        detailContent.setFillWidth(true);
+
+        Label detailPlaceholderLabel = new Label("Please select an aircraft from the table");
+
+
+        //Scene hierarchy setup
         Scene scene = new Scene(root, width, height);
+        root.getChildren().add(splitPane);
+
+        splitPane.getItems().add(aircraftTable);
+
+        splitPane.getItems().add(detailAnchor);
+        detailAnchor.getChildren().add(detailPane);
+        detailPane.setContent(detailContent);
+        detailContent.getChildren().add(detailPlaceholderLabel);
+
 
         stage.setTitle("Acamo by Rudolf Baun");
         stage.setScene(scene);

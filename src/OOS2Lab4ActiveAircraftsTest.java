@@ -1,11 +1,10 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import acamo.ActiveAircrafts;
-import jsonstream.*;
+import jsonstream.PlaneDataServer;
 import messer.BasicAircraft;
 import messer.Messer;
 import senser.Senser;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OOS2Lab4ActiveAircraftsTest
 {
@@ -37,11 +36,11 @@ public class OOS2Lab4ActiveAircraftsTest
 		while(true) {
 			System.out.println("Sleeping for 2 seconds");
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			HashMap<String, BasicAircraft> aircrafts = activeAircrafts.values();
+			ConcurrentHashMap<String, BasicAircraft> aircrafts = activeAircrafts.values();
 			//activeAircrafts.clear();
 			
 			System.out.println("Aircrafts in Hashtable " + aircrafts.size());

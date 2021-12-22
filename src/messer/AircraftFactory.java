@@ -1,7 +1,6 @@
 package messer;
 
 import org.json.JSONArray;
-import org.json.JSONTokener;
 import senser.AircraftSentence;
 
 import java.util.Date;

@@ -11,13 +11,14 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import jsonstream.PlaneDataServer;
 import messer.BasicAircraft;
-import messer.Coordinate;
 import messer.Messer;
 import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static Messer MESSER;
     private ActiveAircrafts activeAircrafts;
-    private boolean queued = false;
+    private boolean scheduled = false;
     private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
 
@@ -55,26 +56,39 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         TableView<BasicAircraft> aircraftTable = new TableView<>();
         //aircraftTable.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(2), BorderWidths.DEFAULT)));
 
-        // Defining the columns
+        /*
+        //Defining the columns
         TableColumn<BasicAircraft, String> colIcao = new TableColumn<>("ICAO");
         TableColumn<BasicAircraft, String> colOperator = new TableColumn<>("Operator");
         TableColumn<BasicAircraft, Date> colPosTime = new TableColumn<>("posTime");
-        TableColumn<BasicAircraft, Coordinate> colCoordinate = new TableColumn<>("Coordinate");
+        TableColumn<BasicAircraft, Double> colCoordinate = new TableColumn<>("Coordinate");
         TableColumn<BasicAircraft, Double> colSpeed = new TableColumn<>("Speed");
         TableColumn<BasicAircraft, Double> colTrak = new TableColumn<>("Trak");
         TableColumn<BasicAircraft, Double> colAltitude = new TableColumn<>("Altitude");
+
+        //TableColumn<BasicAircraft,Double> colLat = new TableColumn<>("lat.");
+        //TableColumn<BasicAircraft,Double> colLon = new TableColumn<>("lon.");
 
         // Defining Factorys
         colIcao.setCellValueFactory( new PropertyValueFactory<>("icao"));
         colOperator.setCellValueFactory( new PropertyValueFactory<>("operator"));
         colPosTime.setCellValueFactory( new PropertyValueFactory<>("posTime"));
-        colOperator.setCellValueFactory( new PropertyValueFactory<>("coordinate"));
+        colCoordinate.setCellValueFactory( new PropertyValueFactory<>("coordinate"));
         colSpeed.setCellValueFactory( new PropertyValueFactory<>("speed"));
         colTrak.setCellValueFactory( new PropertyValueFactory<>("trak"));
         colAltitude.setCellValueFactory( new PropertyValueFactory<>("altitude"));
 
+        //colLat.setCellValueFactory(new PropertyValueFactory<>("coordinate"));
 
+        //colCoordinate.getColumns().addAll(colLat, colLon);
         aircraftTable.getColumns().addAll(colIcao, colOperator, colPosTime, colCoordinate, colSpeed, colTrak, colAltitude);
+        */
+
+        for (String attribute:BasicAircraft.getAttributesNames()) {
+            TableColumn<BasicAircraft, String> column = new TableColumn<>(attribute.substring(0,1).toUpperCase() + attribute.substring(1));
+            column.setCellValueFactory(new PropertyValueFactory<>(attribute));
+            aircraftTable.getColumns().add(column);
+        }
 
         this.aircraftTableItems = FXCollections.observableArrayList();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
@@ -121,10 +135,9 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     @Override
     public void update(Observable<BasicAircraft> observable, BasicAircraft newValue) {
-        System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
-        if(!this.queued){
-            this.queued = true;
-
+        //System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
+        if(!this.scheduled){
+            this.scheduled = true;
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
             executorService.schedule(this::updateTableItems, 1, TimeUnit.SECONDS);
         }
@@ -132,15 +145,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private void updateTableItems(){
         for (BasicAircraft aircraft : this.activeAircrafts.values()){
-
-            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() >= 15000){
+            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() > 60000){
+                System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getPosTime().getTime())/1000);
+                //System.out.println(aircraft);
                 activeAircrafts.remove(aircraft.getIcao());
-                System.out.println(aircraft.getIcao());
             }
         }
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
-        this.queued = false;
+        System.out.println("ActiveAircraft: " + aircraftTableItems.size());
+        this.scheduled = false;
     }
 
     public static void main(String[] args) {

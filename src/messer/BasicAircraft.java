@@ -1,5 +1,7 @@
 package messer;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +64,7 @@ public class BasicAircraft {
 		return Arrays.stream(fields).map(Field::getName).collect(Collectors.toList());
 	}
 
+	@NotNull
 	public static List<Object> getAttributesValues(BasicAircraft ac) throws NoSuchFieldException, IllegalAccessException {
 		List<Object> attributes = new ArrayList<Object>();
 

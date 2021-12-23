@@ -24,6 +24,9 @@ public class AircraftFactory {
         if(!sentence.isNull(3))
             posTime = new Date(sentence.getLong(3)*1000);// posTime is in seconds Date requests in milliseconds
 
+        Date lastCon = null;
+        if(!sentence.isNull(4))
+            lastCon = new Date(sentence.getLong(3)*1000);// posTime is in seconds Date requests in milliseconds
 
         Coordinate coordinate = new Coordinate(NaN, NaN);
         if(!sentence.isNull(5) && !sentence.isNull(6))
@@ -41,6 +44,6 @@ public class AircraftFactory {
         if(!sentence.isNull(9))
             trak = sentence.getDouble(10);
 
-        return new BasicAircraft(icao,operator,posTime,coordinate,speed,trak,altitude);
+        return new BasicAircraft(icao, operator, posTime, lastCon, coordinate, speed, trak, altitude);
     }
 }

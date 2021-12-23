@@ -14,16 +14,18 @@ public class BasicAircraft {
 	private String icao;
 	private String operator;
 	private Date posTime;
+	private Date lastCon;
 	private Coordinate coordinate;
 	private Double speed;
 	private Double trak;
 	private Double altitude;
 
 	
-	public BasicAircraft (String icao, String operator, Date posTime, Coordinate coordinate, double speed, double trak, double altitude) {
+	public BasicAircraft (String icao, String operator, Date posTime, Date lastCon, Coordinate coordinate, double speed, double trak, double altitude) {
 		this.icao = icao;
 		this.operator = operator;
 		this.posTime = posTime;
+		this.lastCon = lastCon;
 		this.coordinate = coordinate;
 		this.speed = speed;
 		this.trak = trak;
@@ -42,6 +44,9 @@ public class BasicAircraft {
 		return posTime;
 	}
 
+	public Date getLastCon() {
+		return lastCon;
+	}
 	public Coordinate getCoordinate() {
 		return coordinate;
 	}
@@ -80,7 +85,7 @@ public class BasicAircraft {
 
 	@Override
 	public String toString() {
-		return "BasicAircraft [icao=" + icao + ", operator=" + operator + ", posTime=" + posTime
-				+ ", " + coordinate + ", speed=" + speed + ", trak =" + trak + ", baro_altitude =" + altitude + "]";
+		return "BasicAircraft [icao=" + icao + ", operator=" + operator + ", posTime=" + posTime + ", "
+				+ "lastCon=" + lastCon + ", " + coordinate + ", speed=" + speed + ", trak =" + trak + ", baro_altitude =" + altitude + "]";
 	}
 }

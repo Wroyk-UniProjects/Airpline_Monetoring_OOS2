@@ -3,10 +3,13 @@ package acamo;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import jsonstream.PlaneDataServer;
@@ -16,9 +19,7 @@ import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -85,14 +86,18 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         */
 
         for (String attribute:BasicAircraft.getAttributesNames()) {
-            TableColumn<BasicAircraft, String> column = new TableColumn<>(attribute.substring(0,1).toUpperCase() + attribute.substring(1));
-            column.setCellValueFactory(new PropertyValueFactory<>(attribute));
-            aircraftTable.getColumns().add(column);
+            if(attribute != "lastCon"){
+                TableColumn<BasicAircraft, String> column = new TableColumn<>(attribute.substring(0,1).toUpperCase() + attribute.substring(1));
+                column.setCellValueFactory(new PropertyValueFactory<>(attribute));
+                aircraftTable.getColumns().add(column);
+            }
         }
 
         this.aircraftTableItems = FXCollections.observableArrayList();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
         aircraftTable.setItems(this.aircraftTableItems);
+
+        aircraftTable.setOnMousePressed(this::onColumnSelect);
 
         /*
             Create the detail UI
@@ -133,6 +138,38 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         stage.show();
     }
 
+
+    private void onColumnSelect(Event event){
+        TableView<BasicAircraft> source = (TableView<BasicAircraft>) event.getSource();
+        BasicAircraft aircraft = source.getSelectionModel().getSelectedItem();
+
+        this.detailPane.setText("Aircraft "+ aircraft.getIcao());
+        VBox detailContent = new VBox();
+        detailContent.setFillWidth(true);
+
+        try {
+            List<String> attributeName = BasicAircraft.getAttributesNames();
+            List<Object> attributeValues = BasicAircraft.getAttributesValues(aircraft);
+
+            System.out.println(attributeName.size());
+
+            for (int i=0; i < attributeName.size(); i++){
+                HBox vBox = new HBox();
+                vBox.setFillHeight(true);
+                Label name = new Label(attributeName.get(i).substring(0,1).toUpperCase() + attributeName.get(i).substring(1) + ": ");
+                Label value = new Label(attributeValues.get(i).toString());
+
+                vBox.getChildren().addAll(name,value);
+                detailContent.getChildren().add(vBox);
+            }
+        }catch (Exception e){
+            System.out.println(e);//TODO correct handling
+        }
+
+        this.detailPane.setContent(detailContent);
+
+    }
+
     @Override
     public void update(Observable<BasicAircraft> observable, BasicAircraft newValue) {
         //System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
@@ -144,13 +181,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     }
 
     private void updateTableItems(){
-        for (BasicAircraft aircraft : this.activeAircrafts.values()){
-            if(System.currentTimeMillis()-aircraft.getPosTime().getTime() > 60000){
-                System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getPosTime().getTime())/1000);
-                //System.out.println(aircraft);
-                activeAircrafts.remove(aircraft.getIcao());
+        if(true){
+            for (BasicAircraft aircraft : this.activeAircrafts.values()){
+                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 120000){
+                    System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
+                    System.out.println(aircraft);
+                    activeAircrafts.remove(aircraft.getIcao());
+                }
             }
         }
+
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
         System.out.println("ActiveAircraft: " + aircraftTableItems.size());

@@ -33,6 +33,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private boolean scheduled = false;
     private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
+    private BasicAircraft currenSelection;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -86,7 +87,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.detailPane.setPadding(new Insets(16,4,16,4));
         AnchorPane.setTopAnchor(this.detailPane,0.);
         AnchorPane.setRightAnchor(this.detailPane,0.);
-        AnchorPane.setBottomAnchor(this.detailPane,0.);
+        //AnchorPane.setBottomAnchor(this.detailPane,0.);
         AnchorPane.setLeftAnchor(this.detailPane,0.);
 
         VBox detailContent = new VBox();
@@ -112,18 +113,21 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         stage.show();
     }
 
-
-    private void onColumnSelect(Event event){
-        // I trust that only MouseEvents from my aircraftTable will be past to this function.
-        TableView<BasicAircraft> source = (TableView<BasicAircraft>) event.getSource();
-        BasicAircraft aircraft = source.getSelectionModel().getSelectedItem();
-
-        if(aircraft == null)
-            return;
-
+    private void populateAircraftDetails(BasicAircraft aircraft){
         this.detailPane.setText("Aircraft: "+ aircraft.getIcao());
         GridPane detailContent = new GridPane();
-        GridPane.setFillWidth(detailContent, true);
+
+        if(aircraft == null){
+            this.detailPane.setText("No Aircraft selected");
+            VBox pContent = new VBox();
+
+            Label pLabel = new Label("Please select an aircraft from the table");
+
+            pContent.getChildren().add(pLabel);
+            this.detailPane.setContent(pContent);
+        }
+
+        currenSelection = aircraft;
 
         try {
             List<String> attributeName = BasicAircraft.getAttributesNames();
@@ -148,12 +152,27 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         }
 
         this.detailPane.setContent(detailContent);
+    }
 
+    private void onColumnSelect(Event event){
+        // I trust that only MouseEvents from my aircraftTable will be past to this function.
+        TableView<BasicAircraft> source = (TableView<BasicAircraft>) event.getSource();
+        BasicAircraft aircraft = source.getSelectionModel().getSelectedItem();
+
+        if(aircraft == null)
+            return;
+
+        populateAircraftDetails(aircraft);
     }
 
     @Override
     public void update(Observable<BasicAircraft> observable, BasicAircraft newValue) {
         //System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
+
+        if(this.currenSelection !=null && Objects.equals(newValue.getIcao(), this.currenSelection.getIcao())){
+            currenSelection = newValue;
+        }
+
         if(!this.scheduled){
             this.scheduled = true;
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -167,10 +186,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
                 if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 300000){//if older than 5 mints remove
                     System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
                     System.out.println(aircraft);
-                    activeAircrafts.remove(aircraft.getIcao());
+                    this.activeAircrafts.remove(aircraft.getIcao());
+
+                    if(this.currenSelection !=null && Objects.equals(this.currenSelection.getIcao(), aircraft.getIcao())){
+                        this.currenSelection = null;
+                    }
                 }
             }
         }
+
+        populateAircraftDetails(currenSelection);
 
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());

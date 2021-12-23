@@ -37,7 +37,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private BasicAircraft currenSelection;
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage primaryStage) throws Exception {
         this.activeAircrafts = new ActiveAircrafts();
         MESSER.addObserver(activeAircrafts);
         MESSER.addObserver(this);
@@ -75,6 +75,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         aircraftTable.setOnMousePressed(this::onColumnSelect);
 
+
         /*
             Create the detail UI
         */
@@ -108,10 +109,10 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.detailPane.setContent(detailContent);
         detailContent.getChildren().add(detailPlaceholderLabel);
 
-
-        stage.setTitle("Acamo by Rudolf Baun");
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setOnCloseRequest(this::onExit);
+        primaryStage.setTitle("Acamo by Rudolf Baun");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     private void populateAircraftDetails(BasicAircraft aircraft){
@@ -227,6 +228,11 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         new Thread(MESSER).start();
 
         launch();
+    }
+
+    private void onExit(Event event){
+        Platform.exit();
+        System.exit(0);
     }
 
 }

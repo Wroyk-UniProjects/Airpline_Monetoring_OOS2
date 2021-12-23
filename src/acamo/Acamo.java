@@ -1,6 +1,7 @@
 package acamo;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -114,9 +115,6 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     }
 
     private void populateAircraftDetails(BasicAircraft aircraft){
-        this.detailPane.setText("Aircraft: "+ aircraft.getIcao());
-        GridPane detailContent = new GridPane();
-
         if(aircraft == null){
             this.detailPane.setText("No Aircraft selected");
             VBox pContent = new VBox();
@@ -125,7 +123,11 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
             pContent.getChildren().add(pLabel);
             this.detailPane.setContent(pContent);
+            return;
         }
+
+        this.detailPane.setText("Aircraft: "+ aircraft.getIcao());
+        GridPane detailContent = new GridPane();
 
         currenSelection = aircraft;
 
@@ -195,7 +197,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             }
         }
 
-        populateAircraftDetails(currenSelection);
+        Platform.runLater(()-> this.populateAircraftDetails(this.currenSelection));
 
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());

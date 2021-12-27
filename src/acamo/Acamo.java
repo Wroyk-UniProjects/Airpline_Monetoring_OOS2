@@ -1,8 +1,6 @@
 package acamo;
 
-import de.saring.leafletmap.LatLong;
-import de.saring.leafletmap.LeafletMapView;
-import de.saring.leafletmap.MapConfig;
+import de.saring.leafletmap.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -21,6 +19,7 @@ import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -30,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static Messer MESSER;
-    private static double latitude = 48.7433425;
-    private static double longitude = 9.3201122;
+    private static LatLong position = new LatLong(48.7433425,9.3201122);
     private ActiveAircrafts activeAircrafts;
     private boolean scheduled = false;
     private ObservableList<BasicAircraft> aircraftTableItems;
@@ -49,12 +47,6 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         AnchorPane root = new AnchorPane();
 
-        LeafletMapView mapView = new LeafletMapView();
-        //AnchorPane.setTopAnchor(mapView,0.);
-        //AnchorPane.setLeftAnchor(mapView,0.);
-        //mapView.setPrefWidth(height);
-        //mapView.setPrefHeight(height);
-
         SplitPane splitPane = new SplitPane();
         AnchorPane.setTopAnchor(splitPane,0.);
         AnchorPane.setLeftAnchor(splitPane,0.);
@@ -62,6 +54,19 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         AnchorPane.setRightAnchor(splitPane,0.);
         splitPane.setPadding(new Insets(8));
         splitPane.setDividerPositions(0.65);
+
+
+        /*
+            Configure map
+         */
+        LeafletMapView mapView = new LeafletMapView();
+        mapView.setPrefWidth(height);
+        mapView.setPrefHeight(height);
+
+        List<MapLayer> mapLayerList = new LinkedList<>();
+        mapLayerList.add(MapLayer.OPENSTREETMAP);
+
+        MapConfig mapViewConfig = new MapConfig(mapLayerList, new ZoomControlConfig(), new ScaleControlConfig(), position);
 
 
         /*
@@ -122,8 +127,11 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         primaryStage.setOnCloseRequest(this::onExit);
         primaryStage.setTitle("Acamo by Rudolf Baun");
         primaryStage.setScene(scene);
+
+        mapView.displayMap(mapViewConfig);
+
         primaryStage.show();
-        mapView.displayMap(new MapConfig());
+
     }
 
     //private void launchSenserAndMesserServices(){
@@ -234,9 +242,9 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         boolean hasConnection = true;
 
         if(hasConnection)
-            server = new PlaneDataServer(urlString, latitude, longitude, 150);
+            server = new PlaneDataServer(urlString, position.getLatitude(), position.getLongitude(), 150);
         else
-            server = new PlaneDataServer(latitude, longitude, 100);
+            server = new PlaneDataServer(position.getLatitude(), position.getLongitude(), 100);
 
         Senser senser = new Senser(server);
         new Thread(server).start();

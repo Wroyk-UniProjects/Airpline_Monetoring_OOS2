@@ -1,5 +1,8 @@
 package acamo;
 
+import de.saring.leafletmap.LatLong;
+import de.saring.leafletmap.LeafletMapView;
+import de.saring.leafletmap.MapConfig;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -27,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static Messer MESSER;
+    private static double latitude = 48.7433425;
+    private static double longitude = 9.3201122;
     private ActiveAircrafts activeAircrafts;
     private boolean scheduled = false;
     private ObservableList<BasicAircraft> aircraftTableItems;
@@ -39,16 +44,23 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         MESSER.addObserver(activeAircrafts);
         MESSER.addObserver(this);
 
-        int width = 640;
-        int height = 480;
+        int width = 1280;
+        int height = 720;
 
         AnchorPane root = new AnchorPane();
+
+        LeafletMapView mapView = new LeafletMapView();
+        //AnchorPane.setTopAnchor(mapView,0.);
+        //AnchorPane.setLeftAnchor(mapView,0.);
+        //mapView.setPrefWidth(height);
+        //mapView.setPrefHeight(height);
+
         SplitPane splitPane = new SplitPane();
         AnchorPane.setTopAnchor(splitPane,0.);
         AnchorPane.setLeftAnchor(splitPane,0.);
         AnchorPane.setBottomAnchor(splitPane,0.);
         AnchorPane.setRightAnchor(splitPane,0.);
-        //splitPane.setPadding(new Insets(8));
+        splitPane.setPadding(new Insets(8));
         splitPane.setDividerPositions(0.65);
 
 
@@ -98,6 +110,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         //Scene hierarchy setup
         Scene scene = new Scene(root, width, height);
         root.getChildren().add(splitPane);
+        root.getChildren().add(mapView);
 
         splitPane.getItems().add(aircraftTable);
 
@@ -110,7 +123,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         primaryStage.setTitle("Acamo by Rudolf Baun");
         primaryStage.setScene(scene);
         primaryStage.show();
+        mapView.displayMap(new MapConfig());
     }
+
+    //private void launchSenserAndMesserServices(){
+
+    //}
 
     private void populateAircraftDetails(BasicAircraft aircraft){
         if(aircraft == null){
@@ -207,12 +225,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.scheduled = false;
     }
 
+
+
     public static void main(String[] args) {
         String urlString = "https://opensky-network.org/api/states/all";
         PlaneDataServer server;
 
-        double latitude = 48.7433425;
-        double longitude = 9.3201122;
         boolean hasConnection = true;
 
         if(hasConnection)

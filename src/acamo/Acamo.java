@@ -47,6 +47,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         AnchorPane root = new AnchorPane();
 
+        /*
         SplitPane splitPane = new SplitPane();
         AnchorPane.setTopAnchor(splitPane,0.);
         AnchorPane.setLeftAnchor(splitPane,0.);
@@ -54,14 +55,17 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         AnchorPane.setRightAnchor(splitPane,0.);
         splitPane.setPadding(new Insets(8));
         splitPane.setDividerPositions(0.65);
-
+        */
 
         /*
             Configure map
          */
         LeafletMapView mapView = new LeafletMapView();
+        AnchorPane.setTopAnchor(mapView,0.);
+        AnchorPane.setLeftAnchor(mapView,0.);
+        AnchorPane.setBottomAnchor(mapView,0.);
         mapView.setPrefWidth(height);
-        mapView.setPrefHeight(height);
+        mapView.setPadding(new Insets(8));
 
         List<MapLayer> mapLayerList = new LinkedList<>();
         mapLayerList.add(MapLayer.OPENSTREETMAP);
@@ -70,10 +74,25 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
 
         /*
+            Create container for Aircraft Table and Details
+        */
+        AnchorPane infoContainer = new AnchorPane();
+        AnchorPane.setTopAnchor(infoContainer,0.);
+        AnchorPane.setRightAnchor(infoContainer,0.);
+        AnchorPane.setBottomAnchor(infoContainer,0.);
+        infoContainer.setPrefWidth(width-height);
+        infoContainer.setPadding(new Insets(8, 8, 8, 0));
+
+
+        /*
             Create the Aircraft Table
         */
         TableView<BasicAircraft> aircraftTable = new TableView<>();
         //aircraftTable.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(2), BorderWidths.DEFAULT)));
+        AnchorPane.setLeftAnchor(aircraftTable,0.);
+        AnchorPane.setRightAnchor(aircraftTable,0.);
+        AnchorPane.setBottomAnchor(aircraftTable,0.);
+        aircraftTable.setPrefHeight(height * 0.54);// set table height to % of window height
 
         for (String attribute:BasicAircraft.getAttributesNames()) {
             if(!Objects.equals(attribute, "lastCon")){
@@ -114,12 +133,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         //Scene hierarchy setup
         Scene scene = new Scene(root, width, height);
-        root.getChildren().add(splitPane);
         root.getChildren().add(mapView);
+        root.getChildren().add(infoContainer);
 
-        splitPane.getItems().add(aircraftTable);
+        infoContainer.getChildren().add(aircraftTable);
 
-        splitPane.getItems().add(detailAnchor);
+        //splitPane.getItems().add(detailAnchor);
         detailAnchor.getChildren().add(this.detailPane);
         this.detailPane.setContent(detailContent);
         detailContent.getChildren().add(detailPlaceholderLabel);

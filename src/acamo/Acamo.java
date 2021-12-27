@@ -5,13 +5,10 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import jsonstream.PlaneDataServer;
@@ -34,7 +31,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private boolean scheduled = false;
     private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
-    private BasicAircraft currenSelection;
+    private BasicAircraft currentSelection;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -130,7 +127,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.detailPane.setText("Aircraft: "+ aircraft.getIcao());
         GridPane detailContent = new GridPane();
 
-        currenSelection = aircraft;
+        currentSelection = aircraft;
 
         try {
             List<String> attributeName = BasicAircraft.getAttributesNames();
@@ -168,12 +165,15 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         populateAircraftDetails(aircraft);
     }
 
+
+
     @Override
     public void update(Observable<BasicAircraft> observable, BasicAircraft newValue) {
         //System.out.println(this.activeAircrafts.retrieve(newValue.getIcao()));
 
-        if(this.currenSelection !=null && Objects.equals(newValue.getIcao(), this.currenSelection.getIcao())){
-            currenSelection = newValue;
+        //Update Aircraft Details for the selected Aircraft
+        if(this.currentSelection !=null && Objects.equals(newValue.getIcao(), this.currentSelection.getIcao())){
+            this.currentSelection = newValue;
         }
 
         if(!this.scheduled){
@@ -184,21 +184,22 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     }
 
     private void updateTableItems(){
-        if(true){
+
+        if(true){// Removing Airplanes that haven't been updated for a while.
             for (BasicAircraft aircraft : this.activeAircrafts.values()){
                 if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 300000){//if older than 5 mints remove
                     System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
                     System.out.println(aircraft);
                     this.activeAircrafts.remove(aircraft.getIcao());
 
-                    if(this.currenSelection !=null && Objects.equals(this.currenSelection.getIcao(), aircraft.getIcao())){
-                        this.currenSelection = null;
+                    if(this.currentSelection !=null && Objects.equals(this.currentSelection.getIcao(), aircraft.getIcao())){
+                        this.currentSelection = null;
                     }
                 }
             }
         }
 
-        Platform.runLater(()-> this.populateAircraftDetails(this.currenSelection));
+        Platform.runLater(()-> this.populateAircraftDetails(this.currentSelection));
 
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());

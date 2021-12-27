@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -19,19 +20,24 @@ import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static Messer MESSER;
+
     private static LatLong position = new LatLong(48.7433425,9.3201122);
     private ActiveAircrafts activeAircrafts;
+    private ConcurrentHashMap<String, Marker> markerHashMap = new ConcurrentHashMap<>();
+
     private boolean scheduled = false;
+
+    private LeafletMapView mapView;
+    private CompletableFuture<Worker.State> loadState;
     private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
     private BasicAircraft currentSelection;
@@ -60,12 +66,14 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         /*
             Configure map
          */
-        LeafletMapView mapView = new LeafletMapView();
+        int mapWidthDiferens = -10; // Magic value to fit the hole aircraft table if window width is 1280
+        this.mapView = new LeafletMapView();
         AnchorPane.setTopAnchor(mapView,0.);
         AnchorPane.setLeftAnchor(mapView,0.);
         AnchorPane.setBottomAnchor(mapView,0.);
-        mapView.setPrefWidth(height);
+        mapView.setPrefWidth(height+mapWidthDiferens);
         mapView.setPadding(new Insets(8));
+        //mapView.setBorder(new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
 
         List<MapLayer> mapLayerList = new LinkedList<>();
         mapLayerList.add(MapLayer.OPENSTREETMAP);
@@ -80,7 +88,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         AnchorPane.setTopAnchor(infoContainer,0.);
         AnchorPane.setRightAnchor(infoContainer,0.);
         AnchorPane.setBottomAnchor(infoContainer,0.);
-        infoContainer.setPrefWidth(width-height);
+        infoContainer.setPrefWidth(width-height-mapWidthDiferens);
         infoContainer.setPadding(new Insets(8, 8, 8, 0));
 
 
@@ -113,13 +121,15 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             Create the detail UI
         */
         AnchorPane detailAnchor = new AnchorPane();
+        AnchorPane.setTopAnchor(detailAnchor,0.);
+        AnchorPane.setLeftAnchor(detailAnchor,0.);
 
         this.detailPane = new TitledPane();
         //detailPane.setBorder( new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
         this.detailPane.setCollapsible(false);
         this.detailPane.setMinWidth(0);
         this.detailPane.setText("No Aircraft selected");
-        this.detailPane.setPadding(new Insets(16,4,16,4));
+        this.detailPane.setPadding(new Insets(8,0,16,16));
         AnchorPane.setTopAnchor(this.detailPane,0.);
         AnchorPane.setRightAnchor(this.detailPane,0.);
         //AnchorPane.setBottomAnchor(this.detailPane,0.);
@@ -138,7 +148,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         infoContainer.getChildren().add(aircraftTable);
 
-        //splitPane.getItems().add(detailAnchor);
+        infoContainer.getChildren().add(detailAnchor);
         detailAnchor.getChildren().add(this.detailPane);
         this.detailPane.setContent(detailContent);
         detailContent.getChildren().add(detailPlaceholderLabel);
@@ -147,7 +157,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         primaryStage.setTitle("Acamo by Rudolf Baun");
         primaryStage.setScene(scene);
 
-        mapView.displayMap(mapViewConfig);
+        this.loadState = mapView.displayMap(mapViewConfig);
+
+        this.loadState.whenComplete((state, throwable) -> {
+            mapView.addCustomMarker("radar", "icons/outline_radar_black_24dp.png");// url != path
+            mapView.addCustomMarker("planeTest", "icons/plane00.png");
+
+            Marker marker = new Marker(position, "center", "radar", -1);
+            markerHashMap.put("center", marker);
+            mapView.addMarker(marker);
+        });
 
         primaryStage.show();
 
@@ -224,18 +243,45 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         if(!this.scheduled){
             this.scheduled = true;
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.schedule(this::updateTableItems, 1, TimeUnit.SECONDS);
+            executorService.schedule(this::updateAircraft, 1, TimeUnit.SECONDS);
         }
     }
 
-    private void updateTableItems(){
+    private void updateMarker(){
+        for (BasicAircraft aircraft: this.activeAircrafts.values()) {
+            Marker marker = this.markerHashMap.get(aircraft.getIcao());
+
+            LatLong latLongAircraft = new LatLong(aircraft.getCoordinate().getLatitude(), aircraft.getCoordinate().getLongitude());
+
+            if (marker == null){
+                marker = new Marker(latLongAircraft, aircraft.getIcao(),"planeTest",0);
+                this.markerHashMap.put(aircraft.getIcao(), marker);
+                mapView.addMarker(marker);
+
+            }else {
+                marker.move(latLongAircraft);
+            }
+
+        }
+    }
+
+    private void updateAircraft(){
 
         if(true){// Removing Airplanes that haven't been updated for a while.
             for (BasicAircraft aircraft : this.activeAircrafts.values()){
-                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 300000){//if older than 5 mints remove
+                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 10000){//if older than 5 mints remove
                     System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
                     System.out.println(aircraft);
                     this.activeAircrafts.remove(aircraft.getIcao());
+
+                    Platform.runLater(() -> {
+                        this.loadState.whenComplete((state, throwable) -> {
+                            if (markerHashMap.containsKey(aircraft.getIcao())){
+                                mapView.removeMarker(this.markerHashMap.get(aircraft.getIcao()));
+                                this.markerHashMap.remove(aircraft.getIcao());
+                            }
+                        });
+                    });
 
                     if(this.currentSelection !=null && Objects.equals(this.currentSelection.getIcao(), aircraft.getIcao())){
                         this.currentSelection = null;
@@ -246,9 +292,14 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         Platform.runLater(()-> this.populateAircraftDetails(this.currentSelection));
 
+
+
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
         System.out.println("ActiveAircraft: " + aircraftTableItems.size());
+
+        Platform.runLater(this::updateMarker);
+
         this.scheduled = false;
     }
 

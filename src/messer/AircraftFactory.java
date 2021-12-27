@@ -30,7 +30,7 @@ public class AircraftFactory {
 
         Coordinate coordinate = new Coordinate(NaN, NaN);
         if(!sentence.isNull(5) && !sentence.isNull(6))
-            coordinate = new Coordinate(sentence.getDouble(5), sentence.getDouble(6));
+            coordinate = new Coordinate(sentence.getDouble(6), sentence.getDouble(5));
 
         double altitude = NaN;
         if(!sentence.isNull(7))

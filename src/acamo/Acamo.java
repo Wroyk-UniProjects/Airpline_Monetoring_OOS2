@@ -161,7 +161,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         this.loadState.whenComplete((state, throwable) -> {
             mapView.addCustomMarker("radar", "icons/outline_radar_black_24dp.png");// url != path
-            mapView.addCustomMarker("planeTest", "icons/plane00.png");
+
+            for(int i = 0; i <= 24; i++){
+                String iString = String.format("%02d",i);//padding with zeros
+
+                mapView.addCustomMarker("plane" + iString, "icons/plane"+ iString +".png");
+            }
 
             Marker marker = new Marker(position, "center", "radar", -1);
             markerHashMap.put("center", marker);
@@ -253,13 +258,21 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
             LatLong latLongAircraft = new LatLong(aircraft.getCoordinate().getLatitude(), aircraft.getCoordinate().getLongitude());
 
+            //Trak is in Degree and ranges from 0 to 360
+            //The images are labelt from 0 to 24 and the image rotation corresponds to clock positions of the name
+            //By multiplying Degree with the Value 0.06667 you get Hours with after rounding can be used to address the Marker
+            int trakInHours = Math.toIntExact( Math.round(aircraft.getTrak() * 0.06667));
+            String trakInHoursString = String.format("%02d",trakInHours);//padding with zeros
+
             if (marker == null){
-                marker = new Marker(latLongAircraft, aircraft.getIcao(),"planeTest",0);
+
+                marker = new Marker(latLongAircraft, aircraft.getIcao(),"plane" + trakInHoursString,0);
                 this.markerHashMap.put(aircraft.getIcao(), marker);
                 mapView.addMarker(marker);
 
             }else {
                 marker.move(latLongAircraft);
+                marker.changeIcon("plane" + trakInHoursString);
             }
 
         }
@@ -269,7 +282,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         if(true){// Removing Airplanes that haven't been updated for a while.
             for (BasicAircraft aircraft : this.activeAircrafts.values()){
-                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 10000){//if older than 5 mints remove
+                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 300000){//if older than 5 mints remove
                     System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
                     System.out.println(aircraft);
                     this.activeAircrafts.remove(aircraft.getIcao());

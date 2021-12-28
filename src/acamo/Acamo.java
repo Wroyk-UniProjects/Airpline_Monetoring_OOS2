@@ -3,6 +3,7 @@ package acamo;
 import de.saring.leafletmap.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
@@ -162,7 +163,6 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         });
     }
 
-
     private TableView<BasicAircraft> setupAircraftTable(int height, double protztenOfHeight){
         /*
             Create the Aircraft Table
@@ -231,11 +231,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         anchor.setPadding(new Insets(0, 16, 0, 16));
 
         TextField latitudeTextField = new TextField(Double.toString(baseStationLocation.getLatitude()));
+        latitudeTextField.textProperty().addListener(this::onInputTextChange);
 
         TextField longitudeTextField = new TextField(Double.toString(baseStationLocation.getLongitude()));
+        longitudeTextField.textProperty().addListener(this::onInputTextChange);
 
         Button submit = new Button("Set as Base Station");
         submit.setOnMouseClicked(this::onPanToNewLocationSubmitted);
+
+        Label validateTextInfo = new Label("");
+        validateTextInfo.setTextFill(Color.RED);
 
         GridPane container = new GridPane();
         AnchorPane.setLeftAnchor(container, 0.);
@@ -248,6 +253,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         container.add(latitudeTextField,0, 0);
         container.add(longitudeTextField,1,0);
         container.add(submit,0,1);
+        container.add(validateTextInfo,1,1);
 
         anchor.getChildren().add(container);
 
@@ -355,6 +361,60 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         moveBaseStationLocationTo(latLong);
         resetMapAndMarker();
+    }
+
+    private void onInputTextChange(javafx.beans.Observable observable) {
+
+        StringProperty sorceSP = ((StringProperty) observable);
+        TextField sorce = (TextField) sorceSP.getBean();
+        GridPane perent =  (GridPane) sorce.getParent();
+
+        TextField lan = (TextField) perent.getChildren().get(0);
+        TextField lon = (TextField) perent.getChildren().get(1);
+        Button button = (Button) perent.getChildren().get(2);
+        Label label = (Label) perent.getChildren().get(3);
+
+        boolean isLanValid = isStringDoubleInRange(lan.getText(), -90., 90.);// Latitude Values are between -90 and 90
+        boolean isLonValid = isStringDoubleInRange(lon.getText(), -180., 180);// Longitude Values are betaine -180 and 180
+
+        if(isLanValid && isLonValid){
+            button.setDisable(false);
+            label.setText("");
+
+        }else if(!isLanValid && isLonValid){
+            button.setDisable(true);
+            label.setText("Latitude invalid");
+
+        }else if(!isLonValid && isLanValid){
+            button.setDisable(true);
+            label.setText("Longitude invalid");
+
+        }else {
+            button.setDisable(true);
+            label.setText("Geo coordinate invalid");
+        }
+    }
+
+    private boolean isStringDoubleInRange(String string, double lowerBound, double upperBound){
+
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");//is Double
+
+
+        if(string == null)
+            return false;
+
+
+        if (pattern.matcher(string).matches()){
+
+            double d = Double.parseDouble(string);
+
+            int result90 = Double.compare(d, upperBound);
+            int resultNeg90 = Double.compare(d, lowerBound);
+
+            return result90 <= 0 && resultNeg90 >= 0;
+        }
+
+        return false;
     }
 
 

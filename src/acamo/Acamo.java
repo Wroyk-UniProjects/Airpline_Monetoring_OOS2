@@ -20,19 +20,20 @@ import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Acamo extends Application implements Observer<BasicAircraft> {
 
-    private static Messer MESSER;
+    private static String openskyAPIUrl;
+    private LatLong baseStationLocation;
 
-    private static LatLong position = new LatLong(48.7433425,9.3201122);
     private ActiveAircrafts activeAircrafts;
-    private ConcurrentHashMap<String, Marker> markerHashMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Marker> markerHashMap;
 
     private boolean scheduled = false;
 
@@ -44,41 +45,18 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.activeAircrafts = new ActiveAircrafts();
-        MESSER.addObserver(activeAircrafts);
-        MESSER.addObserver(this);
 
         int width = 1280;
         int height = 720;
+        int mapWidthDifference = -10; // Magic value to fit the hole aircraft table if window width is 1280
+        double tableProtztenOfHeight = 0.5;
+
+        this.launchSenserAndMesserServices();
+
 
         AnchorPane root = new AnchorPane();
 
-        /*
-        SplitPane splitPane = new SplitPane();
-        AnchorPane.setTopAnchor(splitPane,0.);
-        AnchorPane.setLeftAnchor(splitPane,0.);
-        AnchorPane.setBottomAnchor(splitPane,0.);
-        AnchorPane.setRightAnchor(splitPane,0.);
-        splitPane.setPadding(new Insets(8));
-        splitPane.setDividerPositions(0.65);
-        */
-
-        /*
-            Configure map
-         */
-        int mapWidthDiferens = -10; // Magic value to fit the hole aircraft table if window width is 1280
-        this.mapView = new LeafletMapView();
-        AnchorPane.setTopAnchor(mapView,0.);
-        AnchorPane.setLeftAnchor(mapView,0.);
-        AnchorPane.setBottomAnchor(mapView,0.);
-        mapView.setPrefWidth(height+mapWidthDiferens);
-        mapView.setPadding(new Insets(8));
-        //mapView.setBorder(new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
-
-        List<MapLayer> mapLayerList = new LinkedList<>();
-        mapLayerList.add(MapLayer.OPENSTREETMAP);
-
-        MapConfig mapViewConfig = new MapConfig(mapLayerList, new ZoomControlConfig(), new ScaleControlConfig(), position);
+        this.setupMapView(height, mapWidthDifference);
 
 
         /*
@@ -88,10 +66,93 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         AnchorPane.setTopAnchor(infoContainer,0.);
         AnchorPane.setRightAnchor(infoContainer,0.);
         AnchorPane.setBottomAnchor(infoContainer,0.);
-        infoContainer.setPrefWidth(width-height-mapWidthDiferens);
+        infoContainer.setPrefWidth(width-height-mapWidthDifference);
         infoContainer.setPadding(new Insets(8, 8, 8, 0));
 
+        TableView<BasicAircraft> aircraftTable = this.setupAircraftTable(height, tableProtztenOfHeight);
+        AnchorPane detailAnchor = this.setupAircraftDetail();
 
+        //Scene hierarchy setup
+        Scene scene = new Scene(root, width, height);
+        root.getChildren().add(mapView);
+        root.getChildren().add(infoContainer);
+
+        infoContainer.getChildren().add(aircraftTable);
+        infoContainer.getChildren().add(detailAnchor);
+
+
+        primaryStage.setOnCloseRequest(this::onExit);
+        primaryStage.setTitle("Acamo by Rudolf Baun");
+        primaryStage.setScene(scene);
+
+        primaryStage.show();
+
+    }
+
+    private void launchSenserAndMesserServices(){
+        boolean hasConnection = true;
+
+        baseStationLocation = new LatLong(48.689914715424244,9.20626058572938);//Airport Stuttgart
+
+        PlaneDataServer server;
+        if(hasConnection)
+            server = new PlaneDataServer(Acamo.openskyAPIUrl, baseStationLocation.getLatitude(), baseStationLocation.getLongitude(), 150);
+        else
+            server = new PlaneDataServer(baseStationLocation.getLatitude(), baseStationLocation.getLongitude(), 100);
+
+        Senser senser = new Senser(server);
+        new Thread(server).start();
+        new Thread(senser).start();
+
+        Messer messer = new Messer();
+        senser.addObserver(messer);
+        new Thread(messer).start();
+
+        this.activeAircrafts = new ActiveAircrafts();
+        messer.addObserver(activeAircrafts);
+        messer.addObserver(this);
+    }
+
+
+    private void setupMapView(int height, int mapWidthDifference){
+        /*
+            Configure map
+         */
+        this.mapView = new LeafletMapView();
+        AnchorPane.setTopAnchor(mapView,0.);
+        AnchorPane.setLeftAnchor(mapView,0.);
+        AnchorPane.setBottomAnchor(mapView,0.);
+        mapView.setPrefWidth(height+mapWidthDifference);
+        mapView.setPadding(new Insets(8));
+        //mapView.setBorder(new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
+
+        List<MapLayer> mapLayerList = new LinkedList<>();
+        mapLayerList.add(MapLayer.OPENSTREETMAP);
+
+        MapConfig mapViewConfig = new MapConfig(mapLayerList, new ZoomControlConfig(), new ScaleControlConfig(), baseStationLocation);
+
+        this.loadState = mapView.displayMap(mapViewConfig);
+
+        this.loadState.whenComplete((state, throwable) -> {
+            mapView.addCustomMarker("radar", "icons/outline_radar_black_24dp.png");// url != path
+
+            for(int i = 0; i <= 24; i++){
+                String iString = String.format("%02d",i);//padding with zeros
+
+                mapView.addCustomMarker("plane" + iString, "icons/plane"+ iString +".png");
+            }
+
+            Marker marker = new Marker(baseStationLocation, "center", "radar", -1);
+
+            markerHashMap = new ConcurrentHashMap<>();
+            markerHashMap.put("center", marker);
+            mapView.addMarker(marker);
+
+            //mapView.setZoom(1);//from 0-100
+        });
+    }
+
+    private TableView<BasicAircraft> setupAircraftTable(int height, double protztenOfHeight){
         /*
             Create the Aircraft Table
         */
@@ -100,7 +161,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         AnchorPane.setLeftAnchor(aircraftTable,0.);
         AnchorPane.setRightAnchor(aircraftTable,0.);
         AnchorPane.setBottomAnchor(aircraftTable,0.);
-        aircraftTable.setPrefHeight(height * 0.54);// set table height to % of window height
+        aircraftTable.setPrefHeight(height * protztenOfHeight);// set table height to % of window height 0.5
 
         for (String attribute:BasicAircraft.getAttributesNames()) {
             if(!Objects.equals(attribute, "lastCon")){
@@ -116,7 +177,10 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         aircraftTable.setOnMousePressed(this::onColumnSelect);
 
+        return aircraftTable;
+    }
 
+    private AnchorPane setupAircraftDetail(){
         /*
             Create the detail UI
         */
@@ -141,45 +205,14 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         Label detailPlaceholderLabel = new Label("Please select an aircraft from the table");
 
 
-        //Scene hierarchy setup
-        Scene scene = new Scene(root, width, height);
-        root.getChildren().add(mapView);
-        root.getChildren().add(infoContainer);
-
-        infoContainer.getChildren().add(aircraftTable);
-
-        infoContainer.getChildren().add(detailAnchor);
         detailAnchor.getChildren().add(this.detailPane);
         this.detailPane.setContent(detailContent);
         detailContent.getChildren().add(detailPlaceholderLabel);
 
-        primaryStage.setOnCloseRequest(this::onExit);
-        primaryStage.setTitle("Acamo by Rudolf Baun");
-        primaryStage.setScene(scene);
-
-        this.loadState = mapView.displayMap(mapViewConfig);
-
-        this.loadState.whenComplete((state, throwable) -> {
-            mapView.addCustomMarker("radar", "icons/outline_radar_black_24dp.png");// url != path
-
-            for(int i = 0; i <= 24; i++){
-                String iString = String.format("%02d",i);//padding with zeros
-
-                mapView.addCustomMarker("plane" + iString, "icons/plane"+ iString +".png");
-            }
-
-            Marker marker = new Marker(position, "center", "radar", -1);
-            markerHashMap.put("center", marker);
-            mapView.addMarker(marker);
-        });
-
-        primaryStage.show();
-
+        return detailAnchor;
     }
 
-    //private void launchSenserAndMesserServices(){
 
-    //}
 
     private void populateAircraftDetails(BasicAircraft aircraft){
         if(aircraft == null){
@@ -252,7 +285,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         }
     }
 
-    private void updateMarker(){
+    private void updateMapMarker(){
         for (BasicAircraft aircraft: this.activeAircrafts.values()) {
             Marker marker = this.markerHashMap.get(aircraft.getIcao());
 
@@ -278,11 +311,10 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         }
     }
 
-    private void updateAircraft(){
-
+    private void removeAircraftOverTimeout(long timeoutInMilliseconds){
         if(true){// Removing Airplanes that haven't been updated for a while.
             for (BasicAircraft aircraft : this.activeAircrafts.values()){
-                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > 300000){//if older than 5 mints remove
+                if(System.currentTimeMillis()-aircraft.getLastCon().getTime() > timeoutInMilliseconds){//if older than 5(300000) minutes remove
                     System.out.println("Removed: "+aircraft.getIcao()+", Seconds: "+ (System.currentTimeMillis()-aircraft.getLastCon().getTime())/1000);
                     System.out.println(aircraft);
                     this.activeAircrafts.remove(aircraft.getIcao());
@@ -302,16 +334,20 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
                 }
             }
         }
+    }
+
+    private void updateAircraft(){
+
+        removeAircraftOverTimeout(300000);//if older than 5(300000) minutes remove
 
         Platform.runLater(()-> this.populateAircraftDetails(this.currentSelection));
-
 
 
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
         System.out.println("ActiveAircraft: " + aircraftTableItems.size());
 
-        Platform.runLater(this::updateMarker);
+        Platform.runLater(this::updateMapMarker);
 
         this.scheduled = false;
     }
@@ -319,23 +355,11 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
 
     public static void main(String[] args) {
-        String urlString = "https://opensky-network.org/api/states/all";
-        PlaneDataServer server;
 
-        boolean hasConnection = true;
-
-        if(hasConnection)
-            server = new PlaneDataServer(urlString, position.getLatitude(), position.getLongitude(), 150);
-        else
-            server = new PlaneDataServer(position.getLatitude(), position.getLongitude(), 100);
-
-        Senser senser = new Senser(server);
-        new Thread(server).start();
-        new Thread(senser).start();
-
-        Acamo.MESSER = new Messer();
-        senser.addObserver(MESSER);
-        new Thread(MESSER).start();
+        if(!validateURL(args[0])){
+            throw new IllegalArgumentException(args[0] + " is an invalid API url");
+        }
+        openskyAPIUrl = args[0];
 
         launch();
     }
@@ -345,4 +369,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         System.exit(0);
     }
 
+    private static boolean validateURL(String url){
+
+        Pattern regexPattern = Pattern.compile("https:/{2}(([0-9a-zA-Z-.]*/)|[0-9a-zA-Z-.&?=_])*");
+
+        Matcher matcher = regexPattern.matcher(url);
+
+        return matcher.matches();
+    }
 }

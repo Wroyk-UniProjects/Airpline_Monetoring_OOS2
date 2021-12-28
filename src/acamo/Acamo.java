@@ -33,6 +33,8 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
     private static String openskyAPIUrl;
     private LatLong baseStationLocation;
+    private int searchRadius;
+    private PlaneDataServer planeDataServer;
 
     private ActiveAircrafts activeAircrafts;
     private ConcurrentHashMap<String, Marker> markerHashMap;
@@ -50,7 +52,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         int width = 1280;
         int height = 720;
-        int mapWidthDifference = -10; // Magic value to fit the hole aircraft table if window width is 1280
+        int mapWidthDifference = -12; // Magic value to fit the hole aircraft table if window width is 1280
         double tableProtztenOfHeight = 0.5;
 
         this.launchSenserAndMesserServices();
@@ -96,16 +98,16 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private void launchSenserAndMesserServices(){
         boolean hasConnection = true;
 
-        baseStationLocation = new LatLong(48.689914715424244,9.20626058572938);//Airport Stuttgart
+        this.baseStationLocation = new LatLong(48.689914715424244,9.20626058572938);//Airport Stuttgart
+        this.searchRadius = 100;//in km
 
-        PlaneDataServer server;
         if(hasConnection)
-            server = new PlaneDataServer(Acamo.openskyAPIUrl, baseStationLocation.getLatitude(), baseStationLocation.getLongitude(), 150);
+            this.planeDataServer = new PlaneDataServer(Acamo.openskyAPIUrl, this.baseStationLocation.getLatitude(), this.baseStationLocation.getLongitude(), this.searchRadius);
         else
-            server = new PlaneDataServer(baseStationLocation.getLatitude(), baseStationLocation.getLongitude(), 100);
+            this.planeDataServer = new PlaneDataServer(this.baseStationLocation.getLatitude(), this.baseStationLocation.getLongitude(), this.searchRadius);
 
-        Senser senser = new Senser(server);
-        new Thread(server).start();
+        Senser senser = new Senser(this.planeDataServer);
+        new Thread(this.planeDataServer).start();
         new Thread(senser).start();
 
         Messer messer = new Messer();
@@ -113,7 +115,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         new Thread(messer).start();
 
         this.activeAircrafts = new ActiveAircrafts();
-        messer.addObserver(activeAircrafts);
+        messer.addObserver(this.activeAircrafts);
         messer.addObserver(this);
     }
 
@@ -146,10 +148,10 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
                 mapView.addCustomMarker("plane" + iString, "icons/plane"+ iString +".png");
             }
 
-            Marker marker = new Marker(baseStationLocation, "center", "radar", -1);
+            Marker marker = new Marker(baseStationLocation, "baseStation", "radar", -1);
 
             markerHashMap = new ConcurrentHashMap<>();
-            markerHashMap.put("center", marker);
+            markerHashMap.put("baseStation", marker);
             mapView.addMarker(marker);
 
             //mapView.setZoom(1);//from 0-100
@@ -226,7 +228,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         TextField longitudeTextField = new TextField(Double.toString(baseStationLocation.getLongitude()));
 
-        Button submit = new Button("Pan to Location");
+        Button submit = new Button("Set as Base Station");
         submit.setOnMouseClicked(this::onPanToNewLocationSubmitted);
 
         GridPane container = new GridPane();
@@ -247,6 +249,31 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     }
 
 
+
+    private void moveBaseStationLocationTo(LatLong newLocation){
+        this.baseStationLocation = newLocation;
+
+        this.planeDataServer.resetLocation(newLocation.getLatitude(), newLocation.getLongitude(), this.searchRadius);
+        this.activeAircrafts.clear();
+
+        this.aircraftTableItems.clear();
+
+    }
+    private void resetMapAndMarker(){
+        this.loadState.whenComplete((state, throwable) -> {
+
+            for (Marker marker : this.markerHashMap.values()) {
+                this.mapView.removeMarker(marker);
+            }
+            this.markerHashMap.clear();
+
+            Marker marker = new Marker(baseStationLocation, "baseStation", "radar", -1);
+            markerHashMap.put("baseStation", marker);
+            this.mapView.addMarker(marker);
+
+            this.mapView.panTo(this.baseStationLocation);
+        });
+    }
 
     private void populateAircraftDetails(BasicAircraft aircraft){
         if(aircraft == null){
@@ -302,7 +329,15 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     }
 
     private void onPanToNewLocationSubmitted(MouseEvent event){
-        System.out.println(event.getSource());
+        Button source = (Button) event.getSource();
+        TextField latitudeTextField = (TextField) source.getParent().getChildrenUnmodifiable().get(0);
+        TextField longitudeTextField = (TextField) source.getParent().getChildrenUnmodifiable().get(1);
+
+        LatLong latLong = new LatLong(Double.parseDouble(latitudeTextField.getText()), Double.parseDouble(longitudeTextField.getText()));
+        System.out.println(latLong);
+
+        moveBaseStationLocationTo(latLong);
+        resetMapAndMarker();
     }
 
 
@@ -323,7 +358,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         }
     }
 
-    private void updateMapMarker(){
+    private void updateAircraftMapMarker(){
         for (BasicAircraft aircraft: this.activeAircrafts.values()) {
             Marker marker = this.markerHashMap.get(aircraft.getIcao());
 
@@ -385,7 +420,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
         System.out.println("ActiveAircraft: " + aircraftTableItems.size());
 
-        Platform.runLater(this::updateMapMarker);
+        Platform.runLater(this::updateAircraftMapMarker);
 
         this.scheduled = false;
     }

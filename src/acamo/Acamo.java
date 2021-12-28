@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import jsonstream.PlaneDataServer;
 import messer.BasicAircraft;
@@ -20,6 +21,7 @@ import observer.Observable;
 import observer.Observer;
 import senser.Senser;
 
+import javafx.scene.input.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +73,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         TableView<BasicAircraft> aircraftTable = this.setupAircraftTable(height, tableProtztenOfHeight);
         AnchorPane detailAnchor = this.setupAircraftDetail();
+        AnchorPane locationInputAnchor = this.setupLocationInput(height, tableProtztenOfHeight);
 
         //Scene hierarchy setup
         Scene scene = new Scene(root, width, height);
@@ -79,6 +82,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         infoContainer.getChildren().add(aircraftTable);
         infoContainer.getChildren().add(detailAnchor);
+        infoContainer.getChildren().add(locationInputAnchor);
 
 
         primaryStage.setOnCloseRequest(this::onExit);
@@ -212,6 +216,36 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         return detailAnchor;
     }
 
+    private AnchorPane setupLocationInput(int height, double protztenOfHeight){
+        AnchorPane anchor = new AnchorPane();
+        AnchorPane.setLeftAnchor(anchor,0.);
+        anchor.setLayoutY(height * protztenOfHeight - 140);
+        anchor.setPadding(new Insets(0, 16, 0, 16));
+
+        TextField latitudeTextField = new TextField(Double.toString(baseStationLocation.getLatitude()));
+
+        TextField longitudeTextField = new TextField(Double.toString(baseStationLocation.getLongitude()));
+
+        Button submit = new Button("Pan to Location");
+        submit.setOnMouseClicked(this::onPanToNewLocationSubmitted);
+
+        GridPane container = new GridPane();
+        AnchorPane.setLeftAnchor(container, 0.);
+        AnchorPane.setRightAnchor(container, 0.);
+        container.setPadding(new Insets(2));
+        container.setBorder(new Border( new BorderStroke( Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(4), BorderWidths.DEFAULT)));
+        container.setHgap(4);
+        container.setVgap(4);
+
+        container.add(latitudeTextField,0, 0);
+        container.add(longitudeTextField,1,0);
+        container.add(submit,0,1);
+
+        anchor.getChildren().add(container);
+
+        return anchor;
+    }
+
 
 
     private void populateAircraftDetails(BasicAircraft aircraft){
@@ -256,7 +290,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
         this.detailPane.setContent(detailContent);
     }
 
-    private void onColumnSelect(Event event){
+    private void onColumnSelect(MouseEvent event){
         // I trust that only MouseEvents from my aircraftTable will be past to this function.
         TableView<BasicAircraft> source = (TableView<BasicAircraft>) event.getSource();
         BasicAircraft aircraft = source.getSelectionModel().getSelectedItem();
@@ -265,6 +299,10 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             return;
 
         populateAircraftDetails(aircraft);
+    }
+
+    private void onPanToNewLocationSubmitted(MouseEvent event){
+        System.out.println(event.getSource());
     }
 
 

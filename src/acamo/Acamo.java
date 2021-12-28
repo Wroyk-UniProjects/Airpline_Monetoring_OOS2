@@ -46,6 +46,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
     private ObservableList<BasicAircraft> aircraftTableItems;
     private TitledPane detailPane;
     private BasicAircraft currentSelection;
+    private TableView.TableViewSelectionModel<BasicAircraft> aircraftTableViewSelectionModel;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -146,6 +147,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
                 String iString = String.format("%02d",i);//padding with zeros
 
                 mapView.addCustomMarker("plane" + iString, "icons/plane"+ iString +".png");
+                mapView.addCustomMarker("activePlane" + iString, "icons/active/plane"+ iString +".png");
             }
 
             Marker marker = new Marker(baseStationLocation, "baseStation", "radar", -1);
@@ -154,9 +156,12 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             markerHashMap.put("baseStation", marker);
             mapView.addMarker(marker);
 
+            mapView.onMarkerClick(this::onMapMarkerClick);
+
             //mapView.setZoom(1);//from 0-100
         });
     }
+
 
     private TableView<BasicAircraft> setupAircraftTable(int height, double protztenOfHeight){
         /*
@@ -183,6 +188,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         aircraftTable.setOnMousePressed(this::onColumnSelect);
 
+        this.aircraftTableViewSelectionModel = aircraftTable.getSelectionModel();
         return aircraftTable;
     }
 
@@ -326,6 +332,17 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             return;
 
         populateAircraftDetails(aircraft);
+        updateAircraftMapMarker();
+    }
+
+    private void onMapMarkerClick(String icao) {
+        BasicAircraft aircraft = this.activeAircrafts.retrieve(icao);
+
+        if(aircraft == null)
+            return;
+
+        populateAircraftDetails(aircraft);
+        updateAircraftMapMarker();
     }
 
     private void onPanToNewLocationSubmitted(MouseEvent event){
@@ -370,15 +387,25 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
             int trakInHours = Math.toIntExact( Math.round(aircraft.getTrak() * 0.06667));
             String trakInHoursString = String.format("%02d",trakInHours);//padding with zeros
 
+            String markerType;
+            if (aircraft.equals(this.currentSelection)){
+                markerType = "activePlane" + trakInHoursString;
+                this.aircraftTableViewSelectionModel.select(aircraft);
+            }else {
+                markerType = "plane" + trakInHoursString;
+            }
+
             if (marker == null){
 
-                marker = new Marker(latLongAircraft, aircraft.getIcao(),"plane" + trakInHoursString,0);
+                marker = new Marker(latLongAircraft, aircraft.getIcao(), markerType,0);
+                marker.setClickable();
+
                 this.markerHashMap.put(aircraft.getIcao(), marker);
                 mapView.addMarker(marker);
 
             }else {
                 marker.move(latLongAircraft);
-                marker.changeIcon("plane" + trakInHoursString);
+                marker.changeIcon(markerType);
             }
 
         }
@@ -418,7 +445,7 @@ public class Acamo extends Application implements Observer<BasicAircraft> {
 
         this.aircraftTableItems.clear();
         this.aircraftTableItems.addAll(this.activeAircrafts.values());
-        System.out.println("ActiveAircraft: " + aircraftTableItems.size());
+        //System.out.println("ActiveAircraft: " + aircraftTableItems.size());
 
         Platform.runLater(this::updateAircraftMapMarker);
 

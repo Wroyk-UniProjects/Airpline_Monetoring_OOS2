@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OOS2 Lab SWB:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/OOS2_Lab_SWB_jar</output-path>
+    <root id="archive" name="OOS2 Lab SWB.jar">
+      <element id="module-output" name="OOS2 Lab SWB" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/leafletmap.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/json-20140107.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.web.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/javafx-sdk-17.0.1/lib/javafx.graphics.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

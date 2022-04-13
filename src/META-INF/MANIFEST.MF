@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: acamo.Acamo
+Class-Path: leafletmap.jar json-20140107.jar json-20140107.jar javafx-sw
+ t.jar javafx.web.jar javafx.base.jar javafx.fxml.jar javafx.media.jar j
+ avafx.swing.jar javafx.controls.jar javafx.graphics.jar leafletmap.jar
+
